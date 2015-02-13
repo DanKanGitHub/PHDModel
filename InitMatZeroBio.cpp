@@ -1,0 +1,100 @@
+#include "InitMatZeroBio.h"
+
+void InitMatZeroBio(int Vel_Npe, 
+		    int Nem,
+		    int Vel_Nnm,
+		    E_ISDM Vel_Nod,
+		    E_ISDM Bio_Nod_BC,
+		    E_ISDV All_Proc_Nodes_Bio,
+		    E_ISDV My_Proc_Eles,
+		    int myid,
+		    E_CM & A) {
+
+  //Vel
+  // There are, at most 6 components per row
+  double *Values;
+  Values = new double[6];
+  int *Indices;
+  Indices = new int[6];
+
+  int ii, jj, Error, IndexCounter;
+  
+  for (int Ne = 0; Ne <= Nem - 1; Ne++) 		// loop over all the elements
+  {
+    if(My_Proc_Eles(Ne) == myid)
+    {
+      for (int i = 0; i <= Vel_Npe-1; i++)
+      {
+	
+	// Initialize the index counter
+	IndexCounter = 0;
+
+	// The row of the global matrix
+	ii = Vel_Nod(Ne,i) - 1;
+	
+	if(All_Proc_Nodes_Bio(ii) == myid)
+	{
+	  if(Bio_Nod_BC(Ne,i) != 1) // global node ii is not a BC
+	  {
+	    for(int j = 0; j <= Vel_Npe-1; j++)
+	    {
+
+	      // The column of the global matrix
+	      jj = Vel_Nod(Ne,j) - 1;
+	      
+  // 	    if(All_Proc_Nodes_Bio(jj) == myid) // Am I at a column that I have elements on?
+  // 	    {
+		if(Bio_Nod_BC(Ne,j) != 1)
+		{
+
+		  Values[IndexCounter] = 0.0;
+		  
+		  Indices[IndexCounter] = jj;
+
+		  IndexCounter++;
+		}
+  // 	    }
+	    }
+	    //Build Global Matrix A one row at a time
+	    Error = A.InsertGlobalValues(ii, IndexCounter, Values, Indices);
+	    
+	    if(Error != 0) // && myid == 1)
+	    {
+	      std::cout << "InitMat Zero Bio Broke 1" << endl;
+	      std::cout << "myid =" << myid << endl;
+	      std::cout << "ii = " << ii << endl;
+	      std::cout << "jj = " << jj << endl;
+	      std::cout << "All_Proc_Nodes_Bio(jj) = " << All_Proc_Nodes_Bio(jj) << endl;
+	      Error = 0;
+	    }
+	  } // if ii != 1
+	  // If I own row ii then I also own column ii
+	  else if(Bio_Nod_BC(Ne,i) == 1) // && All_Proc_Nodes_Bio(ii) == myid) // Essential BC on this row
+	  {
+
+	    Values[0] = 0.0;
+
+	    Indices[0] = ii;
+	    
+	    IndexCounter = 1;
+	    
+	    Error = A.InsertGlobalValues(ii, IndexCounter, Values, Indices);
+	    
+	    if(Error != 0) // && myid == 1)
+	    {
+	      std::cout << "InitMat Zero Bio Broke 2" << endl;
+	      std::cout << "myid =" << myid << endl;
+	      std::cout << "jj = " << jj << endl;
+	      std::cout << "All_Proc_Nodes_Bio(jj) = " << All_Proc_Nodes_Bio(jj) << endl;
+	      Error = 0;
+	    }
+	  } // if ii for ii = 1
+	}
+      } // vel i
+    } // if ele
+  } // for Ne
+
+  delete [] Values;
+  delete [] Indices;
+  
+}
