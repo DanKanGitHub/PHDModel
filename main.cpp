@@ -302,9 +302,8 @@ int main(int argc, char *argv[])
   
   // Velocity, Pressure and Stress Data
   Str.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-
   Str_New.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-  
+  Str_New.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
   Str_Old.Shape(Pre_Nnm,3);
 
   // Initialize the sizes of the LHS matrices and RHS vectors
