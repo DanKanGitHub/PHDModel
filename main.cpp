@@ -114,27 +114,26 @@ int main(int argc, char *argv[])
   // variable decalrations
   // Velocity Related
   // Velocity is NNMX2, Depart_Vel is Gaus_Pt_NumX2
-  E_SDM Vel_Glxy, Vel_Old;//Vel, Vel_New, Depart_Vel;
-  E_ISDM Vel_Nod, Vel_Nod_BC_Hor, Vel_Nod_BC_Ver; //, Vel_Nb_Ele, Vel_Nb_Edg;
+  E_SDM Vel_Glxy, Vel_Old;
+  E_ISDM Vel_Nod, Vel_Nod_BC_Hor, Vel_Nod_BC_Ver;
   E_SDM VelVertOutPut, VelHorOutPut;
   E_SDV Vel_Norm;
-  int Vel_Npe, Vel_Nnm; //, Vel_Nb_Ele_No, Vel_Eb_Node_No;
+  int Vel_Npe, Vel_Nnm;
   double Tol;
   
   // Presure Related
   E_SDM Pre_Glxy, PreOutPut;
-  E_ISDM Pre_Nod, Pre_Nod_BC; // , Pre_Nb_Ele, Pre_Nb_Edg;
-  E_SDV Pre_Norm; //Pre, Pre_New;
-  int Pre_Npe, Pre_Nnm; // Pre_Nb_Ele_No, Pre_Eb_Node_No;
-//   double Pre_Tol;
+  E_ISDM Pre_Nod, Pre_Nod_BC;
+  E_SDV Pre_Norm;
+  int Pre_Npe, Pre_Nnm;
 
   // Stress Related
   // Stess is NNMX3
-  E_SDM Str, Str_New, Str_Old;//, Depart_Str, C;
+  E_SDM Str, Str_New, Str_Old;
   E_SDM Stress1OutPut, Stress2OutPut, Stress3OutPut;
   
   // Bio Related
-  E_SDV Bio_Old, Bio_Norm; //Bio, Bio_New, 
+  E_SDV Bio_Old, Bio_Norm;
   E_SDM BioOutPut;
   E_ISDM Bio_Nod_BC;
   
@@ -142,7 +141,7 @@ int main(int argc, char *argv[])
   E_SDM GAUSPT, GAUSWT, Tri_Quad_Pt;
   E_ISDM Ele_Neigh;
   E_SDV Tri_Quad_Wt;
-  int Nem, L, n, File_No, Diff_File_No, Bio_File_No;// Gauss_Pt_Num, L, n are counters
+  int Nem, L, n, File_No, Diff_File_No, Bio_File_No;
   double dx, dy, Time_Step;
   char HorVelFilename[100];
   char VertVelFilename[100];
@@ -163,7 +162,6 @@ int main(int argc, char *argv[])
   
   // Gaussian quadrature points and weights for 1d boundary integration, NGP = 1,2 3, or 4
   // In this code it is intended that NGP = 4
-  
   GAUSPT.Shape(4,4);
   GAUSWT.Shape(4,4);
 
@@ -233,46 +231,6 @@ int main(int argc, char *argv[])
 	    Pre_Nod,		// output
 	    Pre_Nod_BC);	// output
 
-//   std::cout << "Pre_Nod = " << Pre_Nod << endl;
-  
-  // Create data array
-  // Vel & Pre
-//   double Data_VP[2 * Vel_Nnm + Pre_Nnm];
-//   double * Data_Ptr_VP = Data_VP;
-
-  // Bio
-//   double Data_Bio[Vel_Nnm];
-//   double * Data_Ptr_Bio = Data_Bio;
-  
-// Node Partition Class
-//   ProcNodePartitionClass Proc_Node_Part_VP;
-//   Proc_Node_Part_VP.ProcNodePartitionVP(myid, 
-// 					NumProc, 
-// 					Vel_Nnm, 
-// 					Pre_Nnm, 
-// 					Nem,
-// 					Vel_Nod,
-// 					Pre_Nod,
-// 					Vel_Npe,
-// 					Pre_Npe,
-// 					Vel_Nod_BC_Hor,
-// 					Vel_Nod_BC_Ver,
-// 					Pre_Nod_BC);
-// 
-//   ProcNodePartitionClass Proc_Node_Part_Bio;
-//   Proc_Node_Part_Bio.ProcNodePartitionBio(myid, 
-// 					  NumProc, 
-// 					  Vel_Nnm, 
-// 					  Pre_Nnm, 
-// 					  Nem,
-// 					  Vel_Nod,
-// 					  Pre_Nod,
-// 					  Vel_Npe,
-// 					  Pre_Npe,
-// 					  Bio_Nod_BC);
-
-//   std::cout << "Before Class " << endl;
-  
   ProcNodePartitionClass Proc_Node_Part;
   
   Proc_Node_Part.ProcNodePartition(myid,
@@ -284,22 +242,11 @@ int main(int argc, char *argv[])
 				    Vel_Nod,
 				    Pre_Nod,
 				    Nem);
-  
-//   std::cout << "After Class " << endl;
 
   // create a linear map
   int NumGlobalElements_VP = 2 * Vel_Nnm + Pre_Nnm;
   int NumGlobalElements_Bio = Vel_Nnm;
 
-  // class
-//   E_Mp Local_Proc_Map_VP(-1, Proc_Node_Part_VP.Nodes_Per_Proc_VP, Proc_Node_Part_VP.My_Proc_Nodes_VP.Values(), 0, Comm);
-//   E_Mp Full_Sol_Map_VP(NumGlobalElements_VP, NumGlobalElements_VP, 0, Comm);
-//   Epetra_Import CompleteSolution_Importer_VP(Full_Sol_Map_VP, Local_Proc_Map_VP);
-// 
-//   E_Mp Local_Proc_Map_Bio(-1, Proc_Node_Part_Bio.Nodes_Per_Proc_Bio, Proc_Node_Part_Bio.My_Proc_Nodes_Bio.Values(), 0, Comm);
-//   E_Mp Full_Sol_Map_Bio(NumGlobalElements_Bio, NumGlobalElements_Bio, 0, Comm);
-//   Epetra_Import CompleteSolution_Importer_Bio(Full_Sol_Map_Bio, Local_Proc_Map_Bio);
-  
   E_Mp Local_Proc_Map_VP(-1, Proc_Node_Part.Nodes_Per_Proc_VP, Proc_Node_Part.My_Proc_Nodes_VP.Values(), 0, Comm);
   E_Mp Full_Sol_Map_VP(NumGlobalElements_VP, NumGlobalElements_VP, 0, Comm);
   Epetra_Import CompleteSolution_Importer_VP(Full_Sol_Map_VP, Local_Proc_Map_VP);
@@ -307,9 +254,7 @@ int main(int argc, char *argv[])
   E_Mp Local_Proc_Map_Bio(-1, Proc_Node_Part.Nodes_Per_Proc_Bio, Proc_Node_Part.My_Proc_Nodes_Bio.Values(), 0, Comm);
   E_Mp Full_Sol_Map_Bio(NumGlobalElements_Bio, NumGlobalElements_Bio, 0, Comm);
   Epetra_Import CompleteSolution_Importer_Bio(Full_Sol_Map_Bio, Local_Proc_Map_Bio);
-  
-//   std::cout << "After Maps" << endl;
-  
+
   // Create an Epetra_Matrix
   //For my mesh I have, at most, 45 (19 for each component of velocity and 7 from pressure) nonzeros per row
   E_CM A_VP(Copy, Local_Proc_Map_VP, 10 * (2 * Vel_Npe + Pre_Npe));
@@ -324,8 +269,6 @@ int main(int argc, char *argv[])
   E_V Soln_Cur_t(Full_Sol_Map_VP), Soln_Cur_L(Full_Sol_Map_VP), Soln_Next_L(Full_Sol_Map_VP);
   E_V Bio_Soln_Cur_t(Full_Sol_Map_Bio), Bio_Soln_Next_t(Full_Sol_Map_Bio);
 
-//   std::cout << "After Variables" << endl;
-  
   Soln_Cur_t.PutScalar(0.0);
   
   // Initialize the matrix A to all zeros.  This is Prathish's idea
@@ -343,8 +286,6 @@ int main(int argc, char *argv[])
 	      Proc_Node_Part.My_Proc_Eles,
 	      myid,
 	      A_VP);
-  
-//   std::cout << "After InitMatZero" << endl;
 
   InitMatZeroBio(Vel_Npe, 
 		  Nem,
@@ -360,19 +301,11 @@ int main(int argc, char *argv[])
   A_Bio.FillComplete();
   
   // Velocity, Pressure and Stress Data
-//   Vel.Shape(Vel_Nnm,2);
-//   Pre.Size(Pre_Nnm);
   Str.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-//   Bio.Size(Vel_Nnm);
-  
-//   Vel_New.Shape(Vel_Nnm,2);
-//   Pre_New.Size(Pre_Nnm);
+
   Str_New.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-//   Bio_New.Size(Vel_Nnm);
   
-//   Vel_Old.Shape(Vel_Nnm,2);
   Str_Old.Shape(Pre_Nnm,3);
-//   Bio_Old.Size(Vel_Nnm);
 
   // Initialize the sizes of the LHS matrices and RHS vectors
   Vel_Norm.Size(2 * Vel_Nnm);
@@ -393,9 +326,7 @@ int main(int argc, char *argv[])
   {
     Str(i,1) = 1000000;
   }
-  
-    // InitialPre(Pre_Glxy, Pre); // Size Pre_NnmX1, pressure is initialized to zero
-    
+
   InitialStr(Nem, 
 	     Pre_Npe,
 	     SOL_NEW_VIS,
@@ -410,8 +341,6 @@ int main(int argc, char *argv[])
 	     Bio_Soln_Cur_t.Values(),
 	     Str); // Size Pre_NnmX3, the stress tensor is symmetric, output
 
-//   std::cout << "After InitialBio" << endl;
-  
   File_No = 0;
   Diff_File_No = 0;
   Bio_File_No = 0;
@@ -451,9 +380,6 @@ int main(int argc, char *argv[])
   File_No++;
   Diff_File_No++;
   Bio_File_No++;
-
-//   double *Soln_Values = new double[2 * Vel_Nnm + Pre_Nnm];
-//   double *Bio_Soln_Values = new double[Vel_Nnm];
 
   // There are at most 3 neightbors in my triangular mesh.
   Ele_Neigh.Shape(Nem,3);
