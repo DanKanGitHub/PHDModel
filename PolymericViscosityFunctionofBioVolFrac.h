@@ -1,0 +1,6 @@
+#ifndef PolymericViscosityFunctionofBioVolFrac_H_Guard
+#define PolymericViscosityFunctionofBioVolFrac_H_Guard
+
+double PolymericViscosityFunctionofBioVolFrac(double Poly_vis, double BioVolFrac);
+
+#endif

@@ -1,0 +1,38 @@
+// Departure Feet algorithm
+// Uses only the velocity element and passes back both the departure velocity
+// and the departure stress
+
+#ifndef DepartureInfo_H_Guard
+#define DepartureInfo_H_Guard
+
+#include "Epetra_SerialDenseMatrix.h"
+#include "Epetra_IntSerialDenseMatrix.h"
+#include "Epetra_SerialDenseVector.h"
+
+typedef Epetra_SerialDenseMatrix E_SDM;
+typedef Epetra_IntSerialDenseMatrix E_ISDM;
+typedef Epetra_SerialDenseVector E_SDV;
+
+void DepartureFoot(int Vel_Flag, 
+// 		   int Pre_Flag, 
+// 		   int N_TRI_QUAD, 
+		   int Nem, 
+		   int Vel_Nnm,
+// 		   E_SDM Tri_Quad_Pt, 
+		   double TIMESTEP,
+		   double *Vel, 
+// 		   E_SDM Str, 
+		   E_SDM Vel_Glxy, 
+// 		   E_SDM Pre_Glxy, 
+		   int Vel_Npe, 
+// 		   int Pre_Npe, 
+		   E_ISDM Vel_Nod, 
+// 		   E_ISDM Pre_Nod, 
+		   E_ISDM Ele_Neigh,
+		   E_SDV Ini_Foot,
+		   E_SDV & Depart_Foot,
+		   int & New_Ele); 
+// 		   E_SDM & Depart_Vel, 
+// 		   E_SDM & Depart_Str);
+
+#endif
