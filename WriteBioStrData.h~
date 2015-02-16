@@ -1,0 +1,14 @@
+#ifndef WriteBioStrData_H_Guard
+#define WriteBioStrData_H_Guard
+
+#include <fstream>
+#include <ostream>
+#include <ofstream>
+
+using namespace std;
+
+void WriteBioStrData(char* filename, 
+		     double* Data, 
+		     int Size);
+
+#endif

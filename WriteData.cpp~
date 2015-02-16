@@ -1,0 +1,11 @@
+// Writes data to filename using Tianyu's program for inspiration
+
+void WriteData(char* filename)
+{
+  
+  ofstream ofile(filename, ios::out);
+  
+  ofile.flags(ios::scientific | ios::showpos | ios::showpoint );
+  ofile.precision(16);
+  
+}

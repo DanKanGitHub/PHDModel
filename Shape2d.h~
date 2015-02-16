@@ -1,0 +1,25 @@
+// Shape function for 2D finite element method
+// Input: Xi, Eta: natural coordinates
+// 	  Npe: # of nodes per element
+//        Elxy: coordinates of local nodes, array of size Npex2
+//        FLAG: 1 = linear triangle,  2 = quadratic triangle
+// Output: Sf: value of shape functions, size Npex1
+//         Gdsf: Derivate w.r.t. global coordinates, size Npex2
+//         DetJ: determinant of Jacobian
+#ifndef Shape2d_H_Guard
+#define Shape2d_H_Guard
+
+#include "Epetra_SerialDenseMatrix.h"
+
+typedef Epetra_SerialDenseMatrix E_SDM;
+
+void Shape2d(double Xi,
+	     double Eta,
+	     E_SDM Elxy,
+	     int Npe,
+	     int FLAG,
+	     E_SDM & Sf,
+	     E_SDM & Gdsf,
+	     double & DetJ);
+
+#endif

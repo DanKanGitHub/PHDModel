@@ -1,0 +1,6 @@
+#include "BioWeightFunc.h"
+
+double BioWeightFunc(double BioVolumeFraction)
+{
+return BioVolumeFraction;
+}

@@ -1,0 +1,14 @@
+#ifndef QuadPtWt_H_Guard
+#define QuadPtWt_H_Guard
+
+#include "Epetra_Matrix.h"
+#include "Epetra_Vector.h"
+
+typedef Epetra_Matrix E_M;
+typedef Epetra_Vector E_V;
+
+void QuadPtWt(int NTRIQUAD, 
+	      E_M & Tri_Quad_Pt, 
+	      E_V & Tri_Quad_Wt);
+
+#endif

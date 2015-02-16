@@ -1,0 +1,14 @@
+// function to impose boundary conditions (Essential and Natural) for 2D finite element code
+
+#ifndef PreBoundary2d_H_Guard
+#define PreBoundary2d_H_Guard
+
+// #include "PreBCFuncs.h"
+#include "functions2.h"
+// #include "Epetra_SerialDenseMatrix.h"
+
+/*typedef Epetra_SerialDenseMatrix E_SDM*/;
+
+double PreEssenBoundary2d(double x,
+			  double y);
+#endif

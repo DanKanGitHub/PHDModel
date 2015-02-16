@@ -1,0 +1,90 @@
+##############################################################################
+#
+# Make variables for use by Trilinos clients. 
+#
+# Do not edit: This file was generated automatically by CMake.
+#
+##############################################################################
+
+
+## ---------------------------------------------------------------------------
+## Compilers used by Trilinos build
+## ---------------------------------------------------------------------------
+
+Trilinos_CXX_COMPILER=/usr/bin/mpicxx
+
+Trilinos_C_COMPILER=/usr/bin/mpicc
+
+Trilinos_Fortran_COMPILER=/usr/bin/mpif90
+
+
+## ---------------------------------------------------------------------------
+## Compiler flags used by Trilinos build
+## ---------------------------------------------------------------------------
+
+Trilinos_CXX_COMPILER_FLAGS= -O3
+
+Trilinos_C_COMPILER_FLAGS= -O3
+
+Trilinos_Fortran_COMPILER_FLAGS= -O3
+
+## Extra link flags (e.g., specification of fortran libraries)
+Trilinos_EXTRA_LD_FLAGS=
+
+## This is the command-line entry used for setting rpaths. In a build
+## with static libraries it will be empty. 
+Trilinos_SHARED_LIB_RPATH_COMMAND=
+Trilinos_BUILD_SHARED_LIBS=OFF
+
+Trilinos_LINKER=/usr/bin/ld
+Trilinos_AR=/usr/bin/ar
+
+
+## ---------------------------------------------------------------------------
+## Set library specifications and paths 
+## ---------------------------------------------------------------------------
+
+## The project version number
+Trilinos_VERSION=11.4.3
+
+## The project include file directories.
+Trilinos_INCLUDE_DIRS= -I/home/dan/Desktop/Trilinos/trilinos/Mpi11.4.3/include
+
+## The project library directories.
+Trilinos_LIBRARY_DIRS= -L/home/dan/Desktop/Trilinos/trilinos/Mpi11.4.3/lib
+
+## The project libraries.
+Trilinos_LIBRARIES= -lmesquite -lmoochothyra -lmoocho -lrythmos -lmoertel -llocathyra -llocaepetra -llocalapack -lloca -lnoxepetra -lnoxlapack -lnox -lintrepid -lteko -lfei_trilinos -lfei_base -lstratimikos -lstratimikosbelos -lstratimikosaztecoo -lstratimikosamesos -lstratimikosml -lstratimikosifpack -lifpack2-adapters -lifpack2 -lanasazitpetra -lModeLaplace -lanasaziepetra -lanasazi -lbelostpetra -lbelosepetra -lbelos -lml -lkomplex -lifpack -lpamgen_extras -lpamgen -lamesos -lamesos2 -lgaleri-xpetra -lgaleri -laztecoo -ldpliris -lisorropia -loptipack -lthyratpetra -lthyraepetraext -lthyraepetra -lthyracore -lthyratpetra -lthyraepetraext -lthyraepetra -lthyracore -lxpetra-sup -lxpetra-ext -lxpetra -lepetraext -ltpetraext -ltpetrainout -ltpetra -ltriutils -lglobipack -lshards -lzoltan -lepetra -lkokkosdisttsqr -lkokkosnodetsqr -lkokkoslinalg -lkokkosnodeapi -lkokkos -lkokkosdisttsqr -lkokkosnodetsqr -lkokkoslinalg -lkokkosnodeapi -lkokkos -lrtop -lsacado -ltpi -lteuchosremainder -lteuchosnumerics -lteuchoscomm -lteuchosparameterlist -lteuchoscore -lteuchosremainder -lteuchosnumerics -lteuchoscomm -lteuchosparameterlist -lteuchoscore
+
+## The project tpl include paths
+Trilinos_TPL_INCLUDE_DIRS= -I/usr/include
+
+## The project tpl library paths
+Trilinos_TPL_LIBRARY_DIRS= -L/usr/lib
+
+## The project tpl libraries
+Trilinos_TPL_LIBRARIES= /usr/lib/lapack/liblapack.so /usr/lib/libblas/libblas.so /usr/lib/x86_64-linux-gnu/libpthread.so
+
+## ---------------------------------------------------------------------------
+## MPI specific variables
+##   These variables are provided to make it easier to get the mpi libraries
+##   and includes on systems that do not use the mpi wrappers for compiling
+## ---------------------------------------------------------------------------
+
+Trilinos_MPI_LIBRARIES= /usr/lib/openmpi/lib/libmpi.so /usr/lib/openmpi/lib/libmpi_cxx.so /usr/lib/openmpi/lib/libmpi_cxx.a
+Trilinos_MPI_LIBRARY_DIRS= -L/usr/lib/openmpi/lib
+Trilinos_MPI_INCLUDE_DIRS= -I/usr/lib/openmpi/include
+Trilinos_MPI_EXEC=/usr/bin/mpirun
+Trilinos_MPI_EXEC_MAX_NUMPROCS=16
+Trilinos_MPI_EXEC_NUMPROCS_FLAG=-np
+
+## ---------------------------------------------------------------------------
+## Set useful general variables 
+## ---------------------------------------------------------------------------
+
+## The packages enabled for this project
+Trilinos_PACKAGE_LIST= Mesquite Didasko MOOCHO Rythmos Moertel NOX Intrepid Teko FEI Stratimikos Ifpack2 Anasazi Belos ML Komplex Ifpack Pamgen Amesos Amesos2 Galeri AztecOO Pliris Isorropia OptiPack Thyra ThyraTpetraAdapters ThyraEpetraExtAdapters ThyraEpetraAdapters ThyraCore Xpetra EpetraExt Tpetra Triutils GlobiPack Shards Zoltan Epetra Kokkos KokkosClassic RTOp Sacado ThreadPool Teuchos TeuchosRemainder TeuchosNumerics TeuchosComm TeuchosParameterList TeuchosCore TrilinosFramework
+
+## The TPLs enabled for this project
+Trilinos_TPL_LIST= LAPACK BLAS MPI Pthread
+

@@ -1,0 +1,8 @@
+#include 
+
+double RetardationDividedByRelaxation(double BioVolumeFraction)
+{
+
+  return 1 - BioVolumeFraction;
+
+}

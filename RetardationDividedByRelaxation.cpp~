@@ -1,0 +1,8 @@
+#include "RetardationDividedByRelaxation.h"
+
+double RetardationDividedByRelaxation(double BioVolumeFraction)
+{
+
+  return 1079.0 / 1080.0; // * BioVolumeFraction; // 1 - BioVolumeFraction; //
+
+}

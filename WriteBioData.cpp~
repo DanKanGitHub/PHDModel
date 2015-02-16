@@ -1,0 +1,35 @@
+// Writes data to filename using Tianyu's program for inspiration
+// Size = NX + 1 for Stress
+// Size = 2 * NX + 1 for Bio-Film
+
+#include "WriteBioData.h"
+
+void WriteBioData(char* filename,
+		  double* Data, 
+		  int Size)
+{
+  
+  std::ofstream ofile(filename, ios::out);
+  
+  ofile.flags(ios::scientific | ios::showpos | ios::showpoint );
+  ofile.precision(16);
+
+  
+  for(int i = 0; i < Size; i++)
+  {
+    
+    for(int j = 0; j < Size; j++)
+    {
+      
+      ofile << Data[i * Size + j] << "  ";
+      
+    }
+    
+    ofile << Data[i * Size + Size - 1];
+    ofile << endl;
+    
+  }
+  
+  ofile.close();
+  
+}
