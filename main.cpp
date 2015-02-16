@@ -357,8 +357,8 @@ int main(int argc, char *argv[])
   sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_%d.data", Bio_File_No);
   
   WriteBioData(BioFilename,
-		  Bio_Soln_Cur_t.Values(), 
-		  2 * NX + 1);
+		Bio_Soln_Cur_t.Values(), 
+		2 * NX + 1);
   
   sprintf(BioFilename, "./Data/Biofilm/DiffusionOnly/BioFile_%d.data", Diff_File_No);
   

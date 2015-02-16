@@ -31,10 +31,10 @@ void WriteVelPreData(char* HorVelfilename,
       
     }
     
-    HorVelofile << Data[i * (2 * Size + 1) + (2 * Size + 1) - 1];
+//     HorVelofile << Data[i * (2 * Size + 1) + (2 * Size + 1) - 1];
     HorVelofile << endl;
     
-    VertVelofile << Data[i * (2 * Size + 1) + (2 * Size + 1) + (2 * Size + 1) * (2 * Size + 1) - 1];
+//     VertVelofile << Data[i * (2 * Size + 1) + (2 * Size + 1) + (2 * Size + 1) * (2 * Size + 1) - 1];
     VertVelofile << endl;
     
   }
@@ -54,7 +54,7 @@ void WriteVelPreData(char* HorVelfilename,
       
     }
     
-    Preofile << Data[i * (Size + 1) + (Size + 1) - 1];
+//     Preofile << Data[i * (Size + 1) + (Size + 1) - 1];
     Preofile << endl;
 
   }

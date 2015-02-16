@@ -39,13 +39,13 @@ void WriteStrData(char* XXfilename,
       
     }
     
-    XXofile << Data(i * Size + Size - 1,0);
+//     XXofile << Data(i * Size + Size - 1,0);
     XXofile << endl;
     
-    XYofile << Data(i * Size + Size - 1,1);
+//     XYofile << Data(i * Size + Size - 1,1);
     XYofile << endl;
     
-    YYofile << Data(i * Size + Size - 1,2);
+//     YYofile << Data(i * Size + Size - 1,2);
     YYofile << endl;
     
   }

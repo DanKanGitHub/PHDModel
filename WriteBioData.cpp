@@ -25,7 +25,7 @@ void WriteBioData(char* filename,
       
     }
     
-    ofile << Data[i * Size + Size - 1];
+//     ofile << Data[i * Size + Size - 1];
     ofile << endl;
     
   }
