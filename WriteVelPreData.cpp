@@ -30,11 +30,9 @@ void WriteVelPreData(char* HorVelfilename,
       VertVelofile << Data[i * (2 * Size + 1) + j + (2 * Size + 1) * (2 * Size + 1)] << "  ";
       
     }
-    
-//     HorVelofile << Data[i * (2 * Size + 1) + (2 * Size + 1) - 1];
+
     HorVelofile << endl;
-    
-//     VertVelofile << Data[i * (2 * Size + 1) + (2 * Size + 1) + (2 * Size + 1) * (2 * Size + 1) - 1];
+
     VertVelofile << endl;
     
   }
@@ -50,11 +48,11 @@ void WriteVelPreData(char* HorVelfilename,
     for(int j = 0; j < Size + 1; j++)
     {
       
-      Preofile << Data[i * (Size + 1) + j] << "  ";
+      //(2 * Size + 1) * (2 * Size + 1) is the number of Hor Vel terms and the number of Vert Vel terms
+      Preofile << Data[i * (Size + 1) + j + 2 * (2 * Size + 1) * (2 * Size + 1)] << "  ";
       
     }
-    
-//     Preofile << Data[i * (Size + 1) + (Size + 1) - 1];
+
     Preofile << endl;
 
   }
