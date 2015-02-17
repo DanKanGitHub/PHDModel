@@ -59,8 +59,6 @@ void BioDiffSparseAssembly(double DIFF_COEFF,
   Gdsf.Shape(2,Vel_Npe); 		// derivatives w.r.t. global cooridinates
   Ele_Bio.Size(Vel_Npe);
 
-  DIFF_COEFF = 0.0001;
-  
   for (int Ne = 0; Ne <= Nem - 1; Ne++) 		// loop over all the elements
   {
     if(My_Proc_Eles(Ne) == myid)
@@ -135,6 +133,17 @@ void BioDiffSparseAssembly(double DIFF_COEFF,
 		{
 
   		Values[IndexCounter] = Const * (Sf(i) * Sf(j) + DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+		
+// 		std::cout << "i = " << i << endl;
+// 		std::cout << "j = " << j << endl;
+// 		std::cout << "Const = " << Const << endl;
+// 		std::cout << "DIFF_COEFF = " << DIFF_COEFF << endl;
+// 		std::cout << "TIMESTEP = " << TIMESTEP << endl;
+// 		std::cout << "Sf = " << Sf << endl;
+// 		std::cout << "Gdsf = " << Gdsf << endl;
+// 		
+// 		int QWERTY;
+// 		std::cin >> QWERTY;
 
 		Indices[IndexCounter] = jj;
 
