@@ -68,8 +68,8 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 32;			// Number of element intervals in the horizontal direction
-const int NY = 32;
+const int NX = 64;			// Number of element intervals in the horizontal direction
+const int NY = 64;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 10;	// Maximum number of time interations
@@ -95,7 +95,7 @@ const double T_ZERO = 60.0;		// seconds (I read Issac's paper for conformation.)
 const double L_ZERO = 0.01;		// meters
 const double TOL = 0.000001;
 const double DIFF_TOL = 0.000000000001;		// 10^(-12)
-const double DIFF_COEFF = 0.0001; // 0.00001;	// This is a guess.  Diffusion coefffcient for eps diffusion into water
+const double DIFF_COEFF = 0.01; // 0.00001;	// This is a guess.  Diffusion coefffcient for eps diffusion into water
 const double BIO_DIFF_COEFF = 1.0;
 
 int main(int argc, char *argv[])
