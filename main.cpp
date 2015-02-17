@@ -68,8 +68,8 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 64;			// Number of element intervals in the horizontal direction
-const int NY = 64;
+const int NX = 16;			// Number of element intervals in the horizontal direction
+const int NY = 16;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 10;	// Maximum number of time interations
@@ -447,6 +447,7 @@ int main(int argc, char *argv[])
   Solver_VP.SetAztecOption(AZ_kspace, 1000);
   Solver_VP.SetAztecOption(AZ_conv, AZ_noscaled);
   Solver_VP.SetAztecOption(AZ_output,100);
+//   Solver_VP.SetAztecOption(AZ_pre_calc, AZ_reuse);
   
   Solver_Bio.SetPrecOperator(Prec_Bio);
   
@@ -553,8 +554,25 @@ int main(int argc, char *argv[])
       
       A_VP.PutScalar(0.0);
       b_VP.PutScalar(0.0);
-      x_VP.PutScalar(0.0);
       Soln_Next_L.PutScalar(0.0);
+      x_VP.PutScalar(0.0);
+      
+      if(n == 0 & L == 0)
+      {
+	x_VP.PutScalar(0.0);
+      }
+      else
+      {
+	for(int i = 0; i < 2 * Vel_Nnm + Pre_Nnm; i++)
+	{
+	  if(Proc_Node_Part.All_Proc_Nodes_VP[i] == myid)
+	  {
+// 	    std::cout << "Soln_Cur_L(i) = " << Soln_Cur_L(i) << endl;
+// 	    x_VP(i) = Soln_Cur_L(i);
+	  }	  
+	}
+// 	Solver_VP.SetAztecOption(AZ_pre_calc, AZ_reuse);
+      }
       
       if(myid == 0)
       {
