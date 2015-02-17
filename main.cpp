@@ -493,10 +493,10 @@ int main(int argc, char *argv[])
 			  A_Bio, 
 			  b_Bio);
 
-    std::cout << "A_Bio = " << A_Bio << endl;
-    
-    int ghjk;
-    std::cin >> ghjk;
+//     std::cout << "A_Bio = " << A_Bio << endl;
+//     
+//     int ghjk;
+//     std::cin >> ghjk;
     
     Prec_Bio->Compute();
     
