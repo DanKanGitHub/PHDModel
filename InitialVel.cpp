@@ -11,7 +11,7 @@ void InitialVel(int Nnm,
   for (int i = 0; i <= Nnm-1; i++)
   {
     y = Glxy(i,1);
-    Vel[i] = -3.0 * y * (y - 1.0);
+    Vel[i] = -6.0 * y * (y - 1.0);
 //     Vel(i + Nnm) = 0.0;
   }
 }
