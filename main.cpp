@@ -69,8 +69,8 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 64;			// Number of element intervals in the horizontal direction
-const int NY = 64;
+const int NX = 128;			// Number of element intervals in the horizontal direction
+const int NY = 128;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 10;	// Maximum number of time interations
