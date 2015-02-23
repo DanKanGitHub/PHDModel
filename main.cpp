@@ -27,6 +27,7 @@
 #include "VelBioMesh2d.h"
 #include "PreMesh2d.h"
 #include "SparseAssembly.h"
+#include "EquibSparseAssembly.h"
 #include "QuadPtWt.h"
 #include "InitialVel.h"
 #include "InitialStr.h"
@@ -787,6 +788,60 @@ int main(int argc, char *argv[])
       File_No++;
       Bio_File_No++;
     }
+    
+    A_VP.PutScalar(0.0);
+    b_VP.PutScalar(0.0);
+    Soln_Next_L.PutScalar(0.0);
+    
+    InitialGuess(Proc_Node_Part.All_Proc_Nodes_VP.Values(), 
+		  Vel_Npe,
+		  Vel_Nnm,
+		  Proc_Node_Part.My_Proc_Eles.Values(),
+		  Vel_Nod,
+		  Pre_Nod,
+		  Nem,
+		  myid,
+		  Soln_Cur_t.Values(), 
+		  x_VP);
+    
+    EquibSparseAssembly(SOL_NEW_VIS, 
+			POL_NEW_VIS, 
+			DENSITY_WATER,
+			DENSITY_BIO,
+			T_ZERO,
+			L_ZERO,
+			Time_Step,
+			NX,
+			NY,
+			NGP,
+			Vel_Npe, 
+			Pre_Npe, 
+			Nem, 
+			N_TRI_QUAD,
+			Vel_Nnm,
+			Pre_Nnm,
+			Vel_Nod, 
+			Pre_Nod,
+			Vel_Nod_BC_Hor,
+			Vel_Nod_BC_Ver,
+			Pre_Nod_BC,
+			Vel_Glxy, 
+			Pre_Glxy, 
+			Ele_Neigh,
+			VEL_FLAG, 
+			PRE_FLAG, 
+			Tri_Quad_Pt, 
+			Tri_Quad_Wt,
+			GAUSPT,
+			GAUSWT,
+			Str, 
+			Bio_Soln_Cur_t.Values(),
+			Soln_Cur_t.Values(),
+			Proc_Node_Part.All_Proc_Nodes_VP,
+			Proc_Node_Part.My_Proc_Eles,
+			myid,
+			A_VP, 	// output
+			b_VP);
     
     n++;
     
