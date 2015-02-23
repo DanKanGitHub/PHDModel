@@ -4,7 +4,7 @@ CC=g++
 CFLAGS= -Wall -g -I. ${Trilinos_INCLUDE_DIRS} ${Trilinos_TPL_INCLUDE_DIRS} ${Trilinos_MPI_INCLUDE_DIRS} ${Trilinos_MPI_INCLUDE_DIRS}
 LINKS = ${Trilinos_LIBRARY_DIRS} ${Trilinos_TPL_LIBRARY_DIRS} ${Trilinos_LIBRARIES} ${Trilinos_TPL_LIBRARIES} ${Trilinos_MPI_LIBRARIES}
 
-fem2d: main.o VelBioMesh2d.o PreMesh2d.o SparseAssembly.o QuadPtWt.o InitialVel.o InitialStr.o ElementNeigh.o Conformation.o \
+fem2d: main.o VelBioMesh2d.o PreMesh2d.o SparseAssembly.o EquibSparseAssembly.o QuadPtWt.o InitialVel.o InitialStr.o ElementNeigh.o Conformation.o \
 	DepartureFoot.o Shape2d.o FeetSearch.o functions2.o NatBoundary2d.o PreEssenBoundary2d.o \
 	VelEssenBoundary2d.o InitMatZero.o InitialBio.o InitMatZeroBio.o BioSparseAssembly.o BioDiffSparseAssembly.o ProcNodePartitionClass.o BioWeightFunc.o \
 	RetardationDividedByRelaxation.o PolymericViscosityFunctionofBioVolFrac.o WriteVelPreData.o WriteBioData.o WriteStrData.o VectorNorm.o InitialGuess.o
@@ -21,6 +21,9 @@ PreMesh2d.o: PreMesh2d.cpp PreMesh2d.h
 
 SparseAssembly.o: SparseAssembly.cpp SparseAssembly.h Shape2d.h DepartureFoot.h NatBoundary2d.h PreEssenBoundary2d.h VelEssenBoundary2d.h BioWeightFunc.h RetardationDividedByRelaxation.h
 	${CC} SparseAssembly.cpp -c ${CFLAGS}
+
+EquibSparseAssembly.o: EquibSparseAssembly.cpp EquibSparseAssembly.h Shape2d.h DepartureFoot.h NatBoundary2d.h PreEssenBoundary2d.h VelEssenBoundary2d.h BioWeightFunc.h RetardationDividedByRelaxation.h
+	${CC} EquibSparseAssembly.cpp -c ${CFLAGS}
 
 BioSparseAssembly.o: BioSparseAssembly.cpp BioSparseAssembly.h Shape2d.h
 	${CC} BioSparseAssembly.cpp -c ${CFLAGS}
