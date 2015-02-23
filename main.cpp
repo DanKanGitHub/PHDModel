@@ -69,8 +69,8 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 128;			// Number of element intervals in the horizontal direction
-const int NY = 128;
+const int NX = 32;			// Number of element intervals in the horizontal direction
+const int NY = 32;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 10;	// Maximum number of time interations
@@ -345,9 +345,9 @@ int main(int argc, char *argv[])
   Diff_File_No = 0;
   Bio_File_No = 0;
   
-  sprintf(HorVelFilename, "./Data/Velocity/HorVel/HorVelFile_%d.data", File_No);
-  sprintf(VertVelFilename, "./Data/Velocity/VertVel/VertVelFile_%d.data", File_No);
-  sprintf(PreFilename, "./Data/Pressure/PreFile_%d.data", File_No);
+  sprintf(HorVelFilename, "./Data/Velocity/HorVel/HorVelFile_00%d.data", File_No);
+  sprintf(VertVelFilename, "./Data/Velocity/VertVel/VertVelFile_00%d.data", File_No);
+  sprintf(PreFilename, "./Data/Pressure/PreFile_00%d.data", File_No);
   
   WriteVelPreData(HorVelFilename, 
 		  VertVelFilename,
@@ -355,21 +355,21 @@ int main(int argc, char *argv[])
 		  Soln_Cur_t.Values(), 
 		  NX);
   
-  sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_%d.data", Bio_File_No);
+  sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_00%d.data", Bio_File_No);
   
   WriteBioData(BioFilename,
 		Bio_Soln_Cur_t.Values(), 
 		2 * NX + 1);
   
-  sprintf(BioFilename, "./Data/Biofilm/DiffusionOnly/BioFile_%d.data", Diff_File_No);
+  sprintf(BioFilename, "./Data/Biofilm/DiffusionOnly/BioFile_00%d.data", Diff_File_No);
   
   WriteBioData(BioFilename,
 		Bio_Soln_Cur_t.Values(), 
 		2 * NX + 1);
   
-  sprintf(StrXXFilename, "./Data/Stress/XX/StrXXFile_%d.data", File_No);
-  sprintf(StrXYFilename, "./Data/Stress/XY/StrXYFile_%d.data", File_No);
-  sprintf(StrYYFilename, "./Data/Stress/YY/StrYYFile_%d.data", File_No);
+  sprintf(StrXXFilename, "./Data/Stress/XX/StrXXFile_00%d.data", File_No);
+  sprintf(StrXYFilename, "./Data/Stress/XY/StrXYFile_00%d.data", File_No);
+  sprintf(StrYYFilename, "./Data/Stress/YY/StrYYFile_00%d.data", File_No);
   
   WriteStrData(StrXXFilename,
 	       StrXYFilename,
@@ -508,7 +508,7 @@ int main(int argc, char *argv[])
 
     Bio_Soln_Cur_t = Bio_Soln_Next_t;
     
-    sprintf(BioFilename, "./Data/Biofilm/DiffusionOnly/BioFile_%d.data", Diff_File_No);
+    sprintf(BioFilename, "./Data/Biofilm/DiffusionOnly/BioFile_00%d.data", Diff_File_No);
   
     WriteBioData(BioFilename,
 		  Bio_Soln_Cur_t.Values(), 
@@ -523,11 +523,11 @@ int main(int argc, char *argv[])
     std::cout << "Diffusion Complete" << endl;
   }
   
-  sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_%d.data", Bio_File_No);
+  sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_00%d.data", Bio_File_No);
   
   WriteBioData(BioFilename,
-		  Bio_Soln_Cur_t.Values(), 
-		  2 * NX + 1);
+		Bio_Soln_Cur_t.Values(), 
+		2 * NX + 1);
   
   Bio_File_No++;
 
@@ -724,26 +724,60 @@ int main(int argc, char *argv[])
     //If the timestep n just computed is to be printed to the data files
     if((n % Write_Time_Steps_Skipped) == 0)
     {
-      sprintf(HorVelFilename, "./Data/Velocity/HorVel/HorVelFile_%d.data", File_No);
-      sprintf(VertVelFilename, "./Data/Velocity/VertVel/VertVelFile_%d.data", File_No);
-      sprintf(PreFilename, "./Data/Pressure/PreFile_%d.data", File_No);
+      if(File_No <= 9)
+      {
+	sprintf(HorVelFilename, "./Data/Velocity/HorVel/HorVelFile_00%d.data", File_No);
+	sprintf(VertVelFilename, "./Data/Velocity/VertVel/VertVelFile_00%d.data", File_No);
+	sprintf(PreFilename, "./Data/Pressure/PreFile_00%d.data", File_No);
+	
+	sprintf(StrXXFilename, "./Data/Stress/XX/StrXXFile_00%d.data", File_No);
+	sprintf(StrXYFilename, "./Data/Stress/XY/StrXYFile_00%d.data", File_No);
+	sprintf(StrYYFilename, "./Data/Stress/YY/StrYYFile_00%d.data", File_No);
+      }
+      else if ((File_No >= 10) && (File_No < 100))
+      {
+	sprintf(HorVelFilename, "./Data/Velocity/HorVel/HorVelFile_0%d.data", File_No);
+	sprintf(VertVelFilename, "./Data/Velocity/VertVel/VertVelFile_0%d.data", File_No);
+	sprintf(PreFilename, "./Data/Pressure/PreFile_0%d.data", File_No);
+	
+	sprintf(StrXXFilename, "./Data/Stress/XX/StrXXFile_0%d.data", File_No);
+	sprintf(StrXYFilename, "./Data/Stress/XY/StrXYFile_0%d.data", File_No);
+	sprintf(StrYYFilename, "./Data/Stress/YY/StrYYFile_0%d.data", File_No);
+      }
+      else if ((File_No >= 100) && (File_No < 1000))
+      {
+	sprintf(HorVelFilename, "./Data/Velocity/HorVel/HorVelFile_%d.data", File_No);
+	sprintf(VertVelFilename, "./Data/Velocity/VertVel/VertVelFile_%d.data", File_No);
+	sprintf(PreFilename, "./Data/Pressure/PreFile_%d.data", File_No);
+	
+	sprintf(StrXXFilename, "./Data/Stress/XX/StrXXFile_%d.data", File_No);
+	sprintf(StrXYFilename, "./Data/Stress/XY/StrXYFile_%d.data", File_No);
+	sprintf(StrYYFilename, "./Data/Stress/YY/StrYYFile_%d.data", File_No);
+      }
+      
+      if(Bio_File_No <= 9)
+      {
+	sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_00%d.data", Bio_File_No);
+      }
+      else if ((Bio_File_No >= 10) && (Bio_File_No < 100))
+      {
+	sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_0%d.data", Bio_File_No);
+      }
+      else if ((Bio_File_No >= 100) && (Bio_File_No < 1000))
+      {
+	sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_%d.data", Bio_File_No);
+      }
       
       WriteVelPreData(HorVelFilename, 
 		      VertVelFilename,
 		      PreFilename , 
 		      Soln_Cur_t.Values(), 
 		      NX);
-      
-      sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_%d.data", Bio_File_No);
-    
+
       WriteBioData(BioFilename,
 		      Bio_Soln_Cur_t.Values(), 
 		      2 * NX + 1);
-      
-      sprintf(StrXXFilename, "./Data/Stress/XX/StrXXFile_%d.data", File_No);
-      sprintf(StrXYFilename, "./Data/Stress/XY/StrXYFile_%d.data", File_No);
-      sprintf(StrYYFilename, "./Data/Stress/YY/StrYYFile_%d.data", File_No);
-      
+
       WriteStrData(StrXXFilename,
 		  StrXYFilename,
 		  StrYYFilename,
