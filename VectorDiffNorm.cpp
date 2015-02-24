@@ -1,8 +1,8 @@
-// Computes the 2-norm of a vector.
+// Computes the 2-norm of the difference between Vector1 and Vector2
 
-#include "VectorNorm.h"
+#include "VectorDiffNorm.h"
 
-double VectorNorm(double *Vector1, 
+double VectorDiffNorm(double *Vector1, 
 		  double *Vector2, 
 		  int VectorLength)
 {
@@ -20,7 +20,7 @@ double VectorNorm(double *Vector1,
   
 //   cout << "y = " << y << endl;
   
-  y = sqrt(y);
+//   y = sqrt(y);
 
-  return y;
+  return sqrt(y); //y;
 }
