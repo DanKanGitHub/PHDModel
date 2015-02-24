@@ -342,12 +342,12 @@ void SparseAssembly(double Sol_Vis,
 	
 	RetardDivRelax = RetardationDividedByRelaxation(GaussPt_Bio);
 	
-	Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
-	
 	Effective_Den = (1 - GaussPt_Bio) * Sol_Density + GaussPt_Bio * Poly_Density;
 	
 	P_Zero = Effective_Den * U_Zero * U_Zero;
 	
+	Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
+
 	Rey_Num = Effective_Den * U_Zero * L_ZERO / Effective_Vis;
 
 // 	Effective_Den = 1.0; // 0.2 * DENSITY_BIO + 0.8 * DENSITY_WATER;
