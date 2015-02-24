@@ -327,7 +327,7 @@ int main(int argc, char *argv[])
   
   for(int i = 0; i < Pre_Nnm; i++)
   {
-    Str(i,1) = 100000;
+    Str(i,1) = 1000000;
   }
 
   InitialStr(Nem, 
