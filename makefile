@@ -7,7 +7,7 @@ LINKS = ${Trilinos_LIBRARY_DIRS} ${Trilinos_TPL_LIBRARY_DIRS} ${Trilinos_LIBRARI
 fem2d: main.o VelBioMesh2d.o PreMesh2d.o SparseAssembly.o EquibSparseAssembly.o QuadPtWt.o InitialVel.o InitialStr.o ElementNeigh.o Conformation.o \
 	DepartureFoot.o Shape2d.o FeetSearch.o functions2.o NatBoundary2d.o PreEssenBoundary2d.o \
 	VelEssenBoundary2d.o InitMatZero.o InitialBio.o InitMatZeroBio.o BioSparseAssembly.o BioDiffSparseAssembly.o ProcNodePartitionClass.o BioWeightFunc.o \
-	RetardationDividedByRelaxation.o PolymericViscosityFunctionofBioVolFrac.o WriteVelPreData.o WriteBioData.o WriteStrData.o VectorNorm.o InitialGuess.o
+	RetardationDividedByRelaxation.o PolymericViscosityFunctionofBioVolFrac.o WriteVelPreData.o WriteBioData.o WriteStrData.o VectorDiffNorm.o InitialGuess.o
 	${CC} -o $@ $^  $(LINKS)
 
 main.o: main.cpp
@@ -97,8 +97,8 @@ WriteVelPreData.o: WriteVelPreData.cpp WriteVelPreData.h
 WriteStrData.o: WriteStrData.cpp WriteStrData.h
 	${CC} WriteStrData.cpp -c ${CFLAGS}
 
-VectorNorm.o: VectorNorm.cpp VectorNorm.h
-	${CC} VectorNorm.cpp -c ${CFLAGS}
+VectorDiffNorm.o: VectorDiffNorm.cpp VectorDiffNorm.h
+	${CC} VectorDiffNorm.cpp -c ${CFLAGS}
 
 InitialGuess.o: InitialGuess.cpp InitialGuess.h
 	${CC} InitialGuess.cpp -c ${CFLAGS}
