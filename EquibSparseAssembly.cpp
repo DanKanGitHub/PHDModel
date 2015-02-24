@@ -73,7 +73,7 @@ void EquibSparseAssembly(double Sol_Vis,
   
   // Other variables
   int ii, jj, kk, Inod, IndexCounter, Error;//, Gauss_Pt_Num, Cur_Ele;
-  double x, y, Xi, Eta, a00, a11, a22, DetJ, Const;
+  double x, y, Xi, Eta, a11, a22, DetJ, Const;
   double Temp_A11_Global, Temp_A12_Global, Temp_A21_Global, Temp_A22_Global;
   double Temp_B1_Global, Temp_B2_Global; //, Temp_Shared;
   double Effective_Den, Effective_Vis, Rey_Num, Depart_Rey_Num; // Effective_Sol_Vis, Effective_Pol_Vis, 
@@ -231,7 +231,6 @@ void EquibSparseAssembly(double Sol_Vis,
 	
 	Rey_Num = Effective_Den * U_Zero * L_ZERO / Effective_Vis;
 
-	a00 = Rey_Num / TIMESTEP;
 	a11 = RetardDivRelax * Effective_Vis; // Effective Non-Dimensional Solvent Viscosity
 	a22 = a11 / 2.0;
 
@@ -253,7 +252,7 @@ void EquibSparseAssembly(double Sol_Vis,
 	    {
 
 	      //RHS Vector
-	      b_Values[0] = Const * (Vel_Sf(i) * a00 * GaussPt_Vel(0) - GaussPt_Bio_Weight * (
+	      b_Values[0] = Const * ( - GaussPt_Bio_Weight * (
 		Vel_Gdsf(0,i) * Gp_Str(0) + Vel_Gdsf(1,i) * Gp_Str(1)));
 
 	      b_Indices[0] = ii;
@@ -328,7 +327,7 @@ void EquibSparseAssembly(double Sol_Vis,
 				    Essen_Vel);
 
 		  Temp_A11_Global = Const * (a11 * Vel_Gdsf(0,i) * Vel_Gdsf(0,j)
-		      + a22 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j) + a00 * Vel_Sf(i) * Vel_Sf(j));
+		      + a22 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j));
 
 		  b_Values[0] = -Temp_A11_Global * Essen_Vel(0);
 
@@ -506,7 +505,7 @@ void EquibSparseAssembly(double Sol_Vis,
 	    if(Vel_Nod_BC_Ver(Ne,i) != 1) // global node ii is not a BC
 	    {
 	      // The GaussPt_Bio_Weight scales the stress contribution by the amount of bio-film in the element
-	      b_Values[0] = Const * (Vel_Sf(i) * a00 * GaussPt_Vel(1) - GaussPt_Bio_Weight * (
+	      b_Values[0] = Const * ( - GaussPt_Bio_Weight * (
 		Vel_Gdsf(0,i) * Gp_Str(1) + Vel_Gdsf(1,i) * Gp_Str(2)));
 
 	      b_Indices[0] = ii + Vel_Nnm;
@@ -576,7 +575,7 @@ void EquibSparseAssembly(double Sol_Vis,
 		  {
 
 		    Values2[IndexCounter] = Const * (a22 * Vel_Gdsf(0,i) * Vel_Gdsf(0,j)
-		      + a11 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j) + a00 * Vel_Sf(i) * Vel_Sf(j));
+		      + a11 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j));
 
 		    Indices[IndexCounter] = jj + Vel_Nnm;
 		    
@@ -596,7 +595,7 @@ void EquibSparseAssembly(double Sol_Vis,
 				      Essen_Vel);
 
 		    Temp_A22_Global = Const * (a22 * Vel_Gdsf(0,i) * Vel_Gdsf(0,j)
-			+ a11 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j) + a00 * Vel_Sf(i) * Vel_Sf(j));
+			+ a11 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j));
 		    
 		    b_Values[0] = -Temp_A22_Global * Essen_Vel(1);
 
