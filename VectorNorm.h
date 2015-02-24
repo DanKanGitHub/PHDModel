@@ -6,8 +6,7 @@
 
 using namespace std;
 
-double VectorNorm(double *Vector1, 
-		  double *Vector2, 
+double VectorNorm(double *Vector1,
 		  int VectorLength);
 
 #endif

@@ -8,8 +8,8 @@
 
 // !!!!!!!!!!!!! addd sparse matrix utilization!!!!!!!!!!!!
 
-#ifndef Assembly_H_Guard
-#define Assembly_H_Guard
+#ifndef SparseAssembly_H_Guard
+#define SparseAssembly_H_Guard
 
 #include "Shape2d.h"
 #include "DepartureFoot.h"

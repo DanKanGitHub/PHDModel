@@ -42,6 +42,7 @@
 #include "WriteVelPreData.h"
 #include "WriteBioData.h"
 #include "WriteStrData.h"
+#include "VectorDiffNorm.h"
 #include "VectorNorm.h"
 #include "InitialGuess.h"
 
@@ -630,7 +631,7 @@ int main(int argc, char *argv[])
 
       Soln_Next_L.Import(x_VP,CompleteSolution_Importer_VP,Add);
 
-      Tol = VectorNorm(Soln_Cur_L.Values(), 
+      Tol = VectorDiffNorm(Soln_Cur_L.Values(), 
 			Soln_Next_L.Values(), 
 			2 * Vel_Nnm + Pre_Nnm);
 
@@ -842,6 +843,16 @@ int main(int argc, char *argv[])
 			myid,
 			A_VP, 	// output
 			b_VP);
+    
+    Prec_VP->Compute();
+
+    Solver_VP.Iterate(10000, TOL);
+
+    Soln_Next_L.Import(x_VP,CompleteSolution_Importer_VP,Add);
+
+    Tol = VectorDiffNorm(Soln_Cur_t.Values(), 
+		      Soln_Next_L.Values(), 
+		      2 * Vel_Nnm + Pre_Nnm);
     
     n++;
     

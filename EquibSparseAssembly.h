@@ -8,8 +8,8 @@
 
 // !!!!!!!!!!!!! addd sparse matrix utilization!!!!!!!!!!!!
 
-#ifndef Assembly_H_Guard
-#define Assembly_H_Guard
+#ifndef EquibSparseAssembly_H_Guard
+#define EquibSparseAssembly_H_Guard
 
 #include "Shape2d.h"
 #include "VelEssenBoundary2d.h"

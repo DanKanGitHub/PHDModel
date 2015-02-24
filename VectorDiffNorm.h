@@ -7,7 +7,7 @@
 using namespace std;
 
 double VectorDiffNorm(double *Vector1, 
-		  double *Vector2, 
-		  int VectorLength);
+		      double *Vector2, 
+		      int VectorLength);
 
 #endif

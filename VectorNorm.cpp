@@ -1,9 +1,8 @@
-// Computes the 2-norm of a vector.
+// Computes the 2-norm of Vector1
 
 #include "VectorNorm.h"
 
 double VectorNorm(double *Vector1, 
-		  double *Vector2, 
 		  int VectorLength)
 {
   
@@ -14,13 +13,9 @@ double VectorNorm(double *Vector1,
   for(int i = 0; i < VectorLength; i++)
   {
     
-    y += (Vector1[i] - Vector2[i]) * (Vector1[i] - Vector2[i]);
+    y += Vector1[i] * Vector1[i];
     
   }
-  
-//   cout << "y = " << y << endl;
-  
-//   y = sqrt(y);
 
   return sqrt(y); //y;
 }

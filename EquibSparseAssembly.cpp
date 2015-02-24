@@ -72,11 +72,11 @@ void EquibSparseAssembly(double Sol_Vis,
   double GaussPt_Bio, RetardDivRelax, GaussPt_Bio_Weight;
   
   // Other variables
-  int ii, jj, kk, Inod, IndexCounter, Error;//, Gauss_Pt_Num, Cur_Ele;
+  int ii, jj, kk, IndexCounter, Error;//, Gauss_Pt_Num, Cur_Ele;
   double x, y, Xi, Eta, a11, a22, DetJ, Const;
   double Temp_A11_Global, Temp_A12_Global, Temp_A21_Global, Temp_A22_Global;
   double Temp_B1_Global, Temp_B2_Global; //, Temp_Shared;
-  double Effective_Den, Effective_Vis, Rey_Num, Depart_Rey_Num; // Effective_Sol_Vis, Effective_Pol_Vis, 
+  double Effective_Den, Effective_Vis; // Effective_Sol_Vis, Effective_Pol_Vis, 
   double P_Zero, U_Zero;
   
   //Vel
@@ -223,13 +223,11 @@ void EquibSparseAssembly(double Sol_Vis,
 	
 	RetardDivRelax = RetardationDividedByRelaxation(GaussPt_Bio);
 	
-	Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
-	
 	Effective_Den = (1 - GaussPt_Bio) * Sol_Density + GaussPt_Bio * Poly_Density;
 	
 	P_Zero = Effective_Den * U_Zero * U_Zero;
 	
-	Rey_Num = Effective_Den * U_Zero * L_ZERO / Effective_Vis;
+	Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
 
 	a11 = RetardDivRelax * Effective_Vis; // Effective Non-Dimensional Solvent Viscosity
 	a22 = a11 / 2.0;
@@ -304,7 +302,7 @@ void EquibSparseAssembly(double Sol_Vis,
 		  {
 
 		    Values1[IndexCounter] = Const * (a11 * Vel_Gdsf(0,i) * Vel_Gdsf(0,j)
-		      + a22 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j) + a00 * Vel_Sf(i) * Vel_Sf(j));
+		      + a22 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j));
 		    
 		    Indices[IndexCounter] = jj;
 
