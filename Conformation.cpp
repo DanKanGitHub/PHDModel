@@ -278,14 +278,7 @@ void Conformation(double TIMESTEP,
 	ALPHA = 1.0 / Wi;
 	
 	BETA = Effective_Pol_Vis * ALPHA * ALPHA;
-	
-// 	std::cout << "Wi = " << Wi << endl;
-// 	std::cout << "ALPHA = " << ALPHA << endl;
-// 	std::cout << "BETA = " << BETA << endl;
-// 	
-// 	int ghyjk;
-// 	std::cin >> ghyjk;
-	
+
 	// zeros out Grad_Vel
 	for(int i = 0; i <= 1; i++)
 	{
@@ -357,16 +350,24 @@ void Conformation(double TIMESTEP,
 	  {
 	    for(int k = 0; k <= 1; k++)
 	    {
-	      TempMat4(i,l) += 1.0/(Coeff * Coeff) * TempMat3(i,k) * TempMat1(k,l);
+	      TempMat4(i,l) += TempMat3(i,k) * TempMat1(k,l);
 	    }
 	  }
 	}
 
+	for(int i = 0; i <= 1; i++)
+	{
+	  for(int j = 0; j <= 1; j++)
+	  {
+	    TempMat4(i,j) = 1.0/(Coeff * Coeff) * TempMat4(i,j);
+	  }
+	}
+	
 	Inod = Pre_Nod(Ne,j) - 1;
 
-	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
+	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,0);// 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
 	Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
-	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
 
       } // for j
       
@@ -566,16 +567,24 @@ void Conformation(double TIMESTEP,
 	  {
 	    for(int k = 0; k <= 1; k++)
 	    {
-	      TempMat4(i,l) += 1.0/(Coeff * Coeff) * TempMat3(i,k) * TempMat1(k,l);
+	      TempMat4(i,l) += TempMat3(i,k) * TempMat1(k,l);
 	    }
+	  }
+	}
+	
+	for(int i = 0; i <= 1; i++)
+	{
+	  for(int j = 0; j <= 1; j++)
+	  {
+	    TempMat4(i,j) = 1.0/(Coeff * Coeff) * TempMat4(i,j);
 	  }
 	}
 
 	Inod = Pre_Nod(Ne,j) - 1;
 
-	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
+	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,0);// 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
 	Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
-	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
 
       } // for j
     }
@@ -776,16 +785,24 @@ void Conformation(double TIMESTEP,
 	{
 	  for(int k = 0; k <= 1; k++)
 	  {
-	    TempMat4(i,l) += 1.0/(Coeff * Coeff) * TempMat3(i,k) * TempMat1(k,l);
+	    TempMat4(i,l) += TempMat3(i,k) * TempMat1(k,l);
 	  }
 	}
       }
 
+      for(int i = 0; i <= 1; i++)
+	{
+	  for(int j = 0; j <= 1; j++)
+	  {
+	    TempMat4(i,j) = 1.0/(Coeff * Coeff) * TempMat4(i,j);
+	  }
+	}
+      
       Inod = Pre_Nod(Ne, JJ) - 1;
 
-      Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
+      Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,0);// 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
       Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
-      Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+      Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
 
     }// end if
   } // for NE
