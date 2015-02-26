@@ -127,8 +127,8 @@ void Conformation(double TIMESTEP,
       Vel_Elxy(i,0) = Vel_Glxy(Vel_Inod,0);	// x-coordinate
       Vel_Elxy(i,1) = Vel_Glxy(Vel_Inod,1);	// y-coordinate
 
-      El_Vel(0,i) = Vel[Inod];
-      El_Vel(1,i) = Vel[Inod + Vel_Nnm];
+      El_Vel(0,i) = Vel[Vel_Inod];
+      El_Vel(1,i) = Vel[Vel_Inod + Vel_Nnm];
       
       El_Bio(i) = Bio[Vel_Inod];
     }
@@ -279,6 +279,9 @@ void Conformation(double TIMESTEP,
 	
 	BETA = Effective_Pol_Vis * ALPHA * ALPHA;
 
+// 	std::cout << "ALPHA = " << ALPHA << endl;
+// 	std::cout << "BETA = " << BETA << endl;
+	
 	// zeros out Grad_Vel
 	for(int i = 0; i <= 1; i++)
 	{
@@ -350,27 +353,20 @@ void Conformation(double TIMESTEP,
 	  {
 	    for(int k = 0; k <= 1; k++)
 	    {
-	      TempMat4(i,l) += TempMat3(i,k) * TempMat1(k,l);
+	      TempMat4(i,l) += 1.0/(Coeff * Coeff) * TempMat3(i,k) * TempMat1(k,l);
 	    }
 	  }
 	}
 
-	for(int i = 0; i <= 1; i++)
-	{
-	  for(int j = 0; j <= 1; j++)
-	  {
-	    TempMat4(i,j) = 1.0/(Coeff * Coeff) * TempMat4(i,j);
-	  }
-	}
-	
 	Inod = Pre_Nod(Ne,j) - 1;
 
 	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,0);// 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
 	Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
 	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
 
+// 	std::cout << "XX = " << Str_New(Inod, 0) << ", XY = " << Str_New(Inod, 1) << ", YY = " << Str_New(Inod, 2) << endl;
+	
       } // for j
-      
     }
       
     // minus 1 for C++ indexing Ele 2: Ne = 1 and is Ne associated with an odd numbered element
@@ -586,6 +582,8 @@ void Conformation(double TIMESTEP,
 	Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
 	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
 
+// 	std::cout << "XX = " << Str_New(Inod, 0) << ", XY = " << Str_New(Inod, 1) << ", YY = " << Str_New(Inod, 2) << endl;
+	
       } // for j
     }
       
@@ -735,6 +733,10 @@ void Conformation(double TIMESTEP,
 	}
       }
 
+//       std::cout << "Vel_Gdsf = " << Vel_Gdsf << endl;
+//       std::cout << "El_Vel = " << El_Vel << endl;
+//       std::cout << "Gradu = " << Grad_Vel << endl;
+      
       // The invere of gradu times its determinant
       Det_Inv_Grad_Vel(0,0) = Grad_Vel(1,1);
       Det_Inv_Grad_Vel(0,1) = -Grad_Vel(0,1);
@@ -758,6 +760,8 @@ void Conformation(double TIMESTEP,
       TempMat2(0,1) = - TIMESTEP * Det_Inv_Grad_Vel(0,1);
       TempMat2(1,0) = - TIMESTEP * Det_Inv_Grad_Vel(1,0);
       TempMat2(1,1) = 1 - TIMESTEP * Det_Inv_Grad_Vel(1,1);
+      
+//       std::cout << "F = " << TempMat2 << endl;
       
       for(int i = 0; i <= 1; i++)
       {
@@ -800,9 +804,11 @@ void Conformation(double TIMESTEP,
       
       Inod = Pre_Nod(Ne, JJ) - 1;
 
-      Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,0);// 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
+      Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
       Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
-      Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+      Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+      
+//       std::cout << "XX = " << Str_New(Inod, 0) << ", XY = " << Str_New(Inod, 1) << ", YY = " << Str_New(Inod, 2) << endl;
 
     }// end if
   } // for NE
