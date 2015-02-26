@@ -1,6 +1,0 @@
-#ifndef RelaxationRetardation_H_Guard
-#define RelaxationRetardation_H_Guard
-
-double RetardationDividedByRelaxation(double BioVolumeFraction);
-
-#endif
