@@ -67,16 +67,12 @@ void BioSparseAssembly(double DIFF_COEFF,
   Ele_Vert_Vel_Old.Size(Vel_Npe);
 
   Alpha = 1.0;
-  
-//   std::cout << "Here 4" << endl;
 
   for (int Ne = 0; Ne <= Nem - 1; Ne++) 		// loop over all the elements
   {
     if(My_Proc_Eles(Ne) == myid)
     {
-      
-//       std::cout << "Here" << endl;
-      
+
       for (int i = 0; i <= Vel_Npe - 1; i++) 	// get global coordinates of local nodes of element Ne
       {
 	Inod = Vel_Nod(Ne,i) - 1;	// Global node number (minus one for indeXing) of local node.
@@ -93,8 +89,6 @@ void BioSparseAssembly(double DIFF_COEFF,
       {
 	Xi  = Tri_Quad_Pt(Ni,0);
 	Eta = Tri_Quad_Pt(Ni,1);
-	
-// 	std::cout << "Here 2" << endl;
 
 	Shape2d(Xi, 
 		Eta, 
@@ -143,42 +137,14 @@ void BioSparseAssembly(double DIFF_COEFF,
 
 	      //RHS Vector
 	      // With advection
-	      b_Values[0] = Const * (Bio_temp * Sf(i) + (1.0 - Alpha) * TIMESTEP * Bio_temp * (Gdsf(0,i) * Hor_Vel_Old_Temp + Gdsf(1,i)
-  		* Vert_Vel_Old_Temp) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
+// 	      b_Values[0] = Const * (Bio_temp * Sf(i) + (1.0 - Alpha) * TIMESTEP * Bio_temp * (Gdsf(0,i) * Hor_Vel_Old_Temp + Gdsf(1,i)
+//   		* Vert_Vel_Old_Temp) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
 
 	      // Without advection
-// 	      b_Values[0] = Const * (Bio_temp * Sf(i) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
+	      b_Values[0] = Const * (Bio_temp * Sf(i) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
 	      
 	      b_Indices[0] = ii;
 
-  // 	    if(ii == 2 & myid == 0)
-  // 	    {
-  // 
-  // 	      std::cout << "i = " << i << endl;
-  // 	      std::cout << "Sf = " << Sf << endl;
-  // 	      std::cout << "Gdsf = " << Gdsf << endl;
-  // 	      std::cout << "Const = " << Const << endl;
-  // 	      std::cout << "Alpha = " << Alpha << endl;
-  // 	      std::cout << "DIFF_COEFF = " << DIFF_COEFF << endl;
-  // 	      std::cout << "TIMESTEP = " << TIMESTEP << endl;
-  // 	      std::cout << "b(ii) Value = " << b_Values[0] << endl;
-  // // 	      std::cout << "Sf(i) * Sf(j) = " << Sf(i) * Sf(j) << endl;
-  // // 	      std::cout << "Gdsf(0,i) * Gdsf(0,j) = " << Gdsf(0,i) * Gdsf(0,j) << endl;
-  // // 	      std::cout << "Gdsf(1,i) * Gdsf(1,j) = " << Gdsf(1,i) * Gdsf(1,j) << endl;
-  // // 	      std::cout << "Gdsf(i,0) = " << Gdsf(i,0) << endl;
-  // // 	      std::cout << "Gdsf(j,0) = " << Gdsf(j,0) << endl;
-  // // 	      std::cout << "Gdsf(i,1) = " << Gdsf(i,1) << endl;
-  // // 	      std::cout << "Gdsf(j,1) = " << Gdsf(j,1) << endl;
-  // 	      std::cout << "Bio_temp = " << Bio_temp << endl;
-  // 	      std::cout << "Ele_Bio = " << Ele_Bio << endl;
-  // 	      std::cout << "Bio_Old = " << Bio_Old << endl;
-  // 	      
-  // 	      int QWERT;
-  // 	      std::cin >> QWERT;
-  // 
-  // 	    }
-// 	      std::cout << "Here 1" << endl;
-	      
 	      Error = b_Bio.SumIntoGlobalValues(1, b_Values, b_Indices);
 	      
 	      if(Error != 0)
@@ -186,32 +152,6 @@ void BioSparseAssembly(double DIFF_COEFF,
 		std::cout << "Broke Bio 2" << endl;
 		Error = 0;
 	      }
-
-	      // Commented out because the natural BCs are all zero
-    // 	  if(Bio_Nod_BC(Ne,i) == 2) // This row is a natural BC
-    // 	  {
-    // 	    // Modify RHS only
-    // 	    NatBoundary2d(GAUSPT, 
-    // 			  GAUSWT, 
-    // 			  NX,
-    // 			  NGP,
-    // 			  Vel_Glxy, 
-    // 			  Vel_Nod,
-    // 			  Ne,
-    // 			  Nat_Vel);	// output
-    // 
-    // 	    b_Values[0] = 0; // The natural BC for the bio-film are zero
-    // 
-    // // 	    b_Dense(ii) += b_Values[0];
-    // 
-    // 	    b_Indices[0] = ii;
-    // 
-    // 	    Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
-    // 	    if(Error != 0)
-    // 	    {
-    // 	      std::cout << "Broke 3" << endl; 
-    // 	    }
-    // 	  }
 
 	      for(int j = 0; j <= Vel_Npe-1; j++)
 	      {
@@ -222,42 +162,15 @@ void BioSparseAssembly(double DIFF_COEFF,
 		if(Bio_Nod_BC(Ne,j) != 1) // global node jj is not a BC  Doesn't matter if the column is a Natural BC
 		{
   // 		// With advection
-  		Values[IndexCounter] = Const * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + Gdsf(1,j)
-  		* Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+//   		Values[IndexCounter] = Const * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + Gdsf(1,j)
+//   		* Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
 
 		  // Without advection
-// 		  Values[IndexCounter] = Const * (Sf(i) * Sf(j) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+		  Values[IndexCounter] = Const * (Sf(i) * Sf(j) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
 
 		  Indices[IndexCounter] = jj;
 
 		  IndexCounter++;
-		  
-  // 		if(ii == 2 && jj == 1)
-  // 		{
-  // 
-  // 		  std::cout << "i = " << i << endl;
-  // 		  std::cout << "j = " << j << endl;
-  // 		  std::cout << "Sf = " << Sf << endl;
-  // 		  std::cout << "Gdsf = " << Gdsf << endl;
-  // 		  std::cout << "Const = " << Const << endl;
-  // 		  std::cout << "Alpha = " << Alpha << endl;
-  // 		  std::cout << "DIFF_COEFF = " << DIFF_COEFF << endl;
-  // 		  std::cout << "TIMESTEP = " << TIMESTEP << endl;
-  // 		  std::cout << "A(1,1) Value = " << Values[IndexCounter-1] << endl;
-  // 		  std::cout << "Sf(i) * Sf(j) = " << Sf(i) * Sf(j) << endl;
-  // 		  std::cout << "Gdsf(0,i) * Gdsf(0,j) = " << Gdsf(0,i) * Gdsf(0,j) << endl;
-  // 		  std::cout << "Gdsf(1,i) * Gdsf(1,j) = " << Gdsf(1,i) * Gdsf(1,j) << endl;
-  // 		  std::cout << "Gdsf(i,0) = " << Gdsf(i,0) << endl;
-  // 		  std::cout << "Gdsf(j,0) = " << Gdsf(j,0) << endl;
-  // 		  std::cout << "Gdsf(i,1) = " << Gdsf(i,1) << endl;
-  // 		  std::cout << "Gdsf(j,1) = " << Gdsf(j,1) << endl;
-  // 		  std::cout << "Hor_Vel_Temp = " << Hor_Vel_Temp << endl;
-  // 		  std::cout << "Vert_Vel_Temp = " << Vert_Vel_Temp << endl;
-  // 		  
-  // // 		  int QWERT;
-  // // 		  std::cin >> QWERT;
-  // 
-  // 		}
 
 		} // if jj != 1
 		else // (Bio_Nod_BC(Ne,j) == 1) // column of non-EC row is an EC
@@ -272,8 +185,12 @@ void BioSparseAssembly(double DIFF_COEFF,
     // 				Essen_Bio);
 		  Essen_Bio = 0.0;
 
-		  b_Values[0] = -Const * Essen_Bio * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + 
-		  Gdsf(1,j) * Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+		  // with advection
+// 		  b_Values[0] = -Const * Essen_Bio * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + 
+// 		  Gdsf(1,j) * Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+		  
+		  //without advection
+		  b_Values[0] = -Const * Essen_Bio * (Sf(i) * Sf(j) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
 
 		  b_Indices[0] = ii;
 
