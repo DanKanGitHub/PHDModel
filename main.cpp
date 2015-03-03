@@ -71,8 +71,8 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 32;			// Number of element intervals in the horizontal direction
-const int NY = 32;
+const int NX = 64;			// Number of element intervals in the horizontal direction
+const int NY = 64;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 100;	// Maximum number of time interations
@@ -96,7 +96,7 @@ const double DENSITY_BIO = 1.0;	// Density Biofilm, kg/m^3 at 25 C.
 const double DENSITY_WATER = 1.0;	// Density Water, kg/m^3 at 25 C.
 const double T_ZERO = 60.0;		// seconds (I read Issac's paper for conformation.)
 const double L_ZERO = 0.01;		// meters
-const double TOL = 0.000001;
+const double TOL = 0.0000001;
 const double DIFF_TOL = 0.000000000001;		// 10^(-12)
 const double EQUIB_TOL = 0.00001;		// The tolerance that determines if the pre-growth simulation has reached equilibrium
 const double DIFF_COEFF = 0.01; // 0.00001;	// This is a guess.  Diffusion coefffcient for eps diffusion into water
@@ -645,7 +645,7 @@ int main(int argc, char *argv[])
 		   SOL_NEW_VIS,
 		   POL_NEW_VIS,
 		   NX,
-		   RELAX_TIME,
+		   RETARD_TIME,
 		   DENSITY_WATER,
 		   DENSITY_BIO,
 		   T_ZERO,
@@ -805,72 +805,72 @@ int main(int argc, char *argv[])
 		  Soln_Cur_t.Values(), 
 		  x_VP);
     
-    if(myid == 0)
-    {
-      std::cout << "Equib check " << endl;
-    }
-    
-    EquibSparseAssembly(SOL_NEW_VIS, 
-			POL_NEW_VIS, 
-			DENSITY_WATER,
-			DENSITY_BIO,
-			T_ZERO,
-			L_ZERO,
-			Time_Step,
-			NX,
-			NY,
-			NGP,
-			Vel_Npe, 
-			Pre_Npe, 
-			Nem, 
-			N_TRI_QUAD,
-			Vel_Nnm,
-			Pre_Nnm,
-			Vel_Nod, 
-			Pre_Nod,
-			Vel_Nod_BC_Hor,
-			Vel_Nod_BC_Ver,
-			Pre_Nod_BC,
-			Vel_Glxy, 
-			Pre_Glxy, 
-			Ele_Neigh,
-			VEL_FLAG, 
-			PRE_FLAG, 
-			Tri_Quad_Pt, 
-			Tri_Quad_Wt,
-			GAUSPT,
-			GAUSWT,
-			Str, 
-			Bio_Soln_Cur_t.Values(),
-			Soln_Cur_t.Values(),
-			Proc_Node_Part.All_Proc_Nodes_VP,
-			Proc_Node_Part.My_Proc_Eles,
-			myid,
-			A_VP, 	// output
-			b_VP);
-    
-    Prec_VP->Compute();
-
-    Solver_VP.Iterate(10000, TOL);
-
-    Soln_Next_L.Import(x_VP,CompleteSolution_Importer_VP,Add);
-
-    SolnDiffNorm = VectorDiffNorm(Soln_Cur_t.Values(), 
-				  Soln_Next_L.Values(), 
-				  2 * Vel_Nnm + Pre_Nnm);
-    
-    SolnNorm = VectorNorm(Soln_Cur_t.Values(), 
-			  2 * Vel_Nnm + Pre_Nnm);
-    
-    // Update Vel and Pre here so that Bio has the old and new Vel to use.
-    Soln_Cur_t = Soln_Cur_L;
-    
-    EquibTol = SolnDiffNorm / SolnNorm;
-    
-    if(myid == 0)
-    {
-      std::cout << "EquibTol = " << EquibTol << endl;
-    }
+//     if(myid == 0)
+//     {
+//       std::cout << "Equib check " << endl;
+//     }
+//     
+//     EquibSparseAssembly(SOL_NEW_VIS, 
+// 			POL_NEW_VIS, 
+// 			DENSITY_WATER,
+// 			DENSITY_BIO,
+// 			T_ZERO,
+// 			L_ZERO,
+// 			Time_Step,
+// 			NX,
+// 			NY,
+// 			NGP,
+// 			Vel_Npe, 
+// 			Pre_Npe, 
+// 			Nem, 
+// 			N_TRI_QUAD,
+// 			Vel_Nnm,
+// 			Pre_Nnm,
+// 			Vel_Nod, 
+// 			Pre_Nod,
+// 			Vel_Nod_BC_Hor,
+// 			Vel_Nod_BC_Ver,
+// 			Pre_Nod_BC,
+// 			Vel_Glxy, 
+// 			Pre_Glxy, 
+// 			Ele_Neigh,
+// 			VEL_FLAG, 
+// 			PRE_FLAG, 
+// 			Tri_Quad_Pt, 
+// 			Tri_Quad_Wt,
+// 			GAUSPT,
+// 			GAUSWT,
+// 			Str, 
+// 			Bio_Soln_Cur_t.Values(),
+// 			Soln_Cur_t.Values(),
+// 			Proc_Node_Part.All_Proc_Nodes_VP,
+// 			Proc_Node_Part.My_Proc_Eles,
+// 			myid,
+// 			A_VP, 	// output
+// 			b_VP);
+//     
+//     Prec_VP->Compute();
+// 
+//     Solver_VP.Iterate(10000, TOL);
+// 
+//     Soln_Next_L.Import(x_VP,CompleteSolution_Importer_VP,Add);
+// 
+//     SolnDiffNorm = VectorDiffNorm(Soln_Cur_t.Values(), 
+// 				  Soln_Next_L.Values(), 
+// 				  2 * Vel_Nnm + Pre_Nnm);
+//     
+//     SolnNorm = VectorNorm(Soln_Cur_t.Values(), 
+// 			  2 * Vel_Nnm + Pre_Nnm);
+//     
+//     // Update Vel and Pre here so that Bio has the old and new Vel to use.
+//     Soln_Cur_t = Soln_Cur_L;
+//     
+//     EquibTol = SolnDiffNorm / SolnNorm * 1 / (NX * NX);
+//     
+//     if(myid == 0)
+//     {
+//       std::cout << "EquibTol = " << EquibTol << endl;
+//     }
     
     n++;
     

@@ -22,7 +22,7 @@ void Conformation(double TIMESTEP,
 		  double Sol_Vis,
 		  double Poly_Vis,
 		  int NX,
-		  double RELAX_TIME,
+		  double RETARD_TIME,
 		  double Sol_Density,
 		  double Poly_Density,
 		  double T_ZERO,
@@ -273,7 +273,7 @@ void Conformation(double TIMESTEP,
 	
 	Effective_Pol_Vis = (1 - RetardDivRelax) * Effective_Vis;
 	
-	Wi = RELAX_TIME / T_ZERO; // RETARD_TIME / RetardDivRelax = RELAX_TIME
+	Wi = RETARD_TIME / RetardDivRelax; // RETARD_TIME / RetardDivRelax = RELAX_TIME
 	
 	ALPHA = 1.0 / Wi;
 	
