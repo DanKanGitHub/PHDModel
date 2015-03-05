@@ -137,11 +137,11 @@ void BioSparseAssembly(double DIFF_COEFF,
 
 	      //RHS Vector
 	      // With advection
-// 	      b_Values[0] = Const * (Bio_temp * Sf(i) + (1.0 - Alpha) * TIMESTEP * Bio_temp * (Gdsf(0,i) * Hor_Vel_Old_Temp + Gdsf(1,i)
-//   		* Vert_Vel_Old_Temp) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
+	      b_Values[0] = Const * (Bio_temp * Sf(i) + (1.0 - Alpha) * TIMESTEP * Bio_temp * (Gdsf(0,i) * Hor_Vel_Old_Temp + Gdsf(1,i)
+  		* Vert_Vel_Old_Temp) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
 
 	      // Without advection
-	      b_Values[0] = Const * (Bio_temp * Sf(i) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
+// 	      b_Values[0] = Const * (Bio_temp * Sf(i) - (1.0 - Alpha) * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Bio_Deriv_X + Gdsf(1,i) * Bio_Deriv_Y));
 	      
 	      b_Indices[0] = ii;
 
@@ -161,12 +161,12 @@ void BioSparseAssembly(double DIFF_COEFF,
 
 		if(Bio_Nod_BC(Ne,j) != 1) // global node jj is not a BC  Doesn't matter if the column is a Natural BC
 		{
-  // 		// With advection
-//   		Values[IndexCounter] = Const * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + Gdsf(1,j)
-//   		* Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+  		// With advection
+  		Values[IndexCounter] = Const * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + Gdsf(1,j)
+  		* Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
 
 		  // Without advection
-		  Values[IndexCounter] = Const * (Sf(i) * Sf(j) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+// 		  Values[IndexCounter] = Const * (Sf(i) * Sf(j) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
 
 		  Indices[IndexCounter] = jj;
 
@@ -186,11 +186,11 @@ void BioSparseAssembly(double DIFF_COEFF,
 		  Essen_Bio = 0.0;
 
 		  // with advection
-// 		  b_Values[0] = -Const * Essen_Bio * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + 
-// 		  Gdsf(1,j) * Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+		  b_Values[0] = -Const * Essen_Bio * (Sf(i) * Sf(j) - Alpha * TIMESTEP * Sf(j) * (Gdsf(0,i) * Hor_Vel_Temp + 
+		  Gdsf(1,j) * Vert_Vel_Temp) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
 		  
 		  //without advection
-		  b_Values[0] = -Const * Essen_Bio * (Sf(i) * Sf(j) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
+// 		  b_Values[0] = -Const * Essen_Bio * (Sf(i) * Sf(j) + Alpha * DIFF_COEFF * TIMESTEP * (Gdsf(0,i) * Gdsf(0,j) + Gdsf(1,i) * Gdsf(1,j)));
 
 		  b_Indices[0] = ii;
 
