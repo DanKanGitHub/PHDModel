@@ -102,7 +102,15 @@ void PreMesh2d(double dx,
   
   Nod.Shape(Nem,Npe); // Added a dimension for the EBC, NBC flag.
   Nod_BC.Shape(Nem,Npe); //
-
+  // Initialize
+//     for(int i = 0; i <= Nem - 1; i++)
+//     {
+//       for(int j = 0; j <= Npe - 1; j++)
+//       {
+// 	Nod(i,j,0) = 0;
+//       }
+//     }
+  
   // global coordinate of nodes
   for (int i = 0; i <= Nnm-1; i++)
   {
@@ -127,4 +135,9 @@ void PreMesh2d(double dx,
       Nod(Eln2-1,2) = Nod(Eln2-1,1) - 1;
     }
   }
+  
+  // There is only one pressure BC, it is essential, and at the first global node
+//   Nod_BC(0,0) = 1; // Lower element local node one.
+//   Nod_BC(1,0) = 1; // Upper element local node one.
+
 }
