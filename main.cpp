@@ -71,13 +71,14 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 64;			// Number of element intervals in the horizontal direction
-const int NY = 64;
+const int NX = 32;			// Number of element intervals in the horizontal direction
+const int NY = 32;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 100;	// Maximum number of time interations
-const int VEL_FLAG = 2;			// Program flags
+const int VEL_FLAG = 2;			// Program flags 1 = linear, 2 = quadratic
 const int PRE_FLAG = 1;
+const int STRESS_FLAG = 1;
 const int Write_Time_Steps_Skipped = 1;
 
 const double XL = 0.0;			// coordinate of left boundary element
@@ -120,25 +121,23 @@ int main(int argc, char *argv[])
   // Velocity is NNMX2, Depart_Vel is Gaus_Pt_NumX2
   E_SDM Vel_Glxy, Vel_Old;
   E_ISDM Vel_Nod, Vel_Nod_BC_Hor, Vel_Nod_BC_Ver;
-  E_SDM VelVertOutPut, VelHorOutPut;
   E_SDV Vel_Norm;
   int Vel_Npe, Vel_Nnm;
   double Tol;
   
   // Presure Related
-  E_SDM Pre_Glxy, PreOutPut;
+  E_SDM Pre_Glxy;
   E_ISDM Pre_Nod, Pre_Nod_BC;
   E_SDV Pre_Norm;
   int Pre_Npe, Pre_Nnm;
 
   // Stress Related
   // Stess is NNMX3
-  E_SDM Str, Str_New, Str_Old;
-  E_SDM Stress1OutPut, Stress2OutPut, Stress3OutPut;
+  E_SDM Str, Str_New, Str_Old, Str_Nod;
+  int Str_Npe, Write_Size, Str_Nnm;
   
   // Bio Related
   E_SDV Bio_Old, Bio_Norm;
-  E_SDM BioOutPut;
   E_ISDM Bio_Nod_BC;
   
   // Other
@@ -154,15 +153,6 @@ int main(int argc, char *argv[])
   char StrXYFilename[100];
   char StrYYFilename[100];
   char BioFilename[100];
-
-  // Delete these soon
-  VelVertOutPut.Shape(2 * NX + 1, 2 * NX + 1);
-  VelHorOutPut.Shape(2 * NX + 1, 2 * NX + 1);
-  PreOutPut.Shape(NX + 1, NX + 1);
-  Stress1OutPut.Shape(NX + 1, NX + 1);
-  Stress2OutPut.Shape(NX + 1, NX + 1);
-  Stress3OutPut.Shape(NX + 1, NX + 1);
-  BioOutPut.Shape(2 * NX + 1, 2 * NX + 1);
   
   // Gaussian quadrature points and weights for 1d boundary integration, NGP = 1,2 3, or 4
   // In this code it is intended that NGP = 4
@@ -235,6 +225,23 @@ int main(int argc, char *argv[])
 	    Pre_Nod,		// output
 	    Pre_Nod_BC);	// output
 
+  if(STRESS_FLAG == 1)
+  {
+    Str_Npe = 3;	// Linear triangle has 3 nodes.
+    Write_Size = NX + 1;
+    Str_Nnm = Pre_Nnm;
+//     Str_Nod.Shape(Nem, Str_Npe);
+//     Str_Nod = Pre_Nod;
+  }
+  else
+  {
+    Str_Npe = 6;	// quadratic triangle has 6 nodes.
+    Write_Size = 2 * NX + 1;
+    Str_Nnm = Vel_Nnm;
+//     Str_Nod.Shape(Nem, Str_Npe);
+//     Str_Nod = Vel_Nod;
+  }
+  
   ProcNodePartitionClass Proc_Node_Part;
   
   Proc_Node_Part.ProcNodePartition(myid,
@@ -305,10 +312,10 @@ int main(int argc, char *argv[])
   A_Bio.FillComplete();
   
   // Velocity, Pressure and Stress Data
-  Str.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-  Str_New.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-  Str_New.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-  Str_Old.Shape(Pre_Nnm,3);
+  Str.Shape(Str_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
+  Str_New.Shape(Str_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
+  Str_New.Shape(Str_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
+  Str_Old.Shape(Str_Nnm,3);
 
   // Initialize the sizes of the LHS matrices and RHS vectors
   Vel_Norm.Size(2 * Vel_Nnm);
@@ -330,19 +337,38 @@ int main(int argc, char *argv[])
     Str(i,1) = 1000000;
   }
 
-  InitialStr(Nem, 
-	     Pre_Npe,
-	     SOL_NEW_VIS,
-	     POL_NEW_VIS,
-	     DENSITY_WATER,
-	     DENSITY_BIO,
-	     L_ZERO,
-	     T_ZERO,
-	     Vel_Nod,
-	     Pre_Nod,
-	     Pre_Glxy, 
-	     Bio_Soln_Cur_t.Values(),
-	     Str); // Size Pre_NnmX3, the stress tensor is symmetric, output
+  if(STRESS_FLAG == 1)
+  {
+    InitialStr(Nem, 
+	      Str_Npe,
+	      SOL_NEW_VIS,
+	      POL_NEW_VIS,
+	      DENSITY_WATER,
+	      DENSITY_BIO,
+	      L_ZERO,
+	      T_ZERO,
+	      Vel_Nod,
+	      Pre_Nod,
+	      Pre_Glxy, 
+	      Bio_Soln_Cur_t.Values(),
+	      Str); // Size Pre_NnmX3, the stress tensor is symmetric, output
+  }
+  else
+  {
+    InitialStr(Nem, 
+	      Str_Npe,
+	      SOL_NEW_VIS,
+	      POL_NEW_VIS,
+	      DENSITY_WATER,
+	      DENSITY_BIO,
+	      L_ZERO,
+	      T_ZERO,
+	      Vel_Nod,
+	      Vel_Nod,
+	      Vel_Glxy, 
+	      Bio_Soln_Cur_t.Values(),
+	      Str); // Size Pre_NnmX3, the stress tensor is symmetric, output
+  }
 
   File_No = 0;
   Diff_File_No = 0;
@@ -378,7 +404,7 @@ int main(int argc, char *argv[])
 	       StrXYFilename,
 	       StrYYFilename,
 	       Str, 
-	       NX + 1);
+	       Write_Size);
   
   File_No++;
   Diff_File_No++;
@@ -496,11 +522,6 @@ int main(int argc, char *argv[])
 			  A_Bio, 
 			  b_Bio);
 
-//     std::cout << "A_Bio = " << A_Bio << endl;
-//     
-//     int ghjk;
-//     std::cin >> ghjk;
-    
     Prec_Bio->Compute();
     
     Solver_Bio.Iterate(1000, DIFF_TOL);
@@ -549,7 +570,6 @@ int main(int argc, char *argv[])
   
     // Initialize tolerances
     Tol = 1.0;
-//     Pre_Tol = 1.0;
 
     Soln_Cur_L = Soln_Cur_t;
     Bio_Soln_Next_t = Bio_Soln_Cur_t;
@@ -578,8 +598,6 @@ int main(int argc, char *argv[])
 		    myid,
 		    Soln_Cur_L.Values(), 
 		    x_VP);
-	
-// 	Solver_VP.SetAztecOption(AZ_pre_calc, AZ_reuse);
       }
       
       if(myid == 0)
@@ -600,10 +618,12 @@ int main(int argc, char *argv[])
 		      NGP,
 		      Vel_Npe, 
 		      Pre_Npe, 
+		      Str_Npe,
 		      Nem, 
 		      N_TRI_QUAD,
 		      Vel_Nnm,
 		      Pre_Nnm,
+		      Str_Nnm,
 		      Vel_Nod, 
 		      Pre_Nod,
 		      Vel_Nod_BC_Hor,
@@ -614,6 +634,7 @@ int main(int argc, char *argv[])
 		      Ele_Neigh,
 		      VEL_FLAG, 
 		      PRE_FLAG, 
+		      STRESS_FLAG,
 		      Tri_Quad_Pt, 
 		      Tri_Quad_Wt,
 		      GAUSPT,
@@ -651,11 +672,11 @@ int main(int argc, char *argv[])
 		   T_ZERO,
 		   L_ZERO,
 		   Vel_Npe, 
-		   Pre_Npe, 
+		   Pre_Npe,
+		   Str_Npe, 
 		   Nem, 
 		   Vel_Nnm,
 		   N_TRI_QUAD,
-		   Pre_Nnm,
 		   Vel_Nod, 
 		   Pre_Nod, 
 		   Vel_Glxy, 
@@ -664,7 +685,7 @@ int main(int argc, char *argv[])
 		   Tri_Quad_Wt, 
 		   Ele_Neigh,
 		   VEL_FLAG, 
-		   PRE_FLAG, 
+		   STRESS_FLAG, 
 		   Soln_Cur_L.Values(),
 		   Soln_Cur_t.Values(),
 		   Bio_Soln_Cur_t.Values(),
@@ -784,7 +805,7 @@ int main(int argc, char *argv[])
 		  StrXYFilename,
 		  StrYYFilename,
 		  Str, 
-		  NX + 1);
+		  Write_Size);
       
       File_No++;
       Bio_File_No++;
@@ -794,16 +815,16 @@ int main(int argc, char *argv[])
     b_VP.PutScalar(0.0);
     Soln_Next_L.PutScalar(0.0);
     
-    InitialGuess(Proc_Node_Part.All_Proc_Nodes_VP.Values(), 
-		  Vel_Npe,
-		  Vel_Nnm,
-		  Proc_Node_Part.My_Proc_Eles.Values(),
-		  Vel_Nod,
-		  Pre_Nod,
-		  Nem,
-		  myid,
-		  Soln_Cur_t.Values(), 
-		  x_VP);
+//     InitialGuess(Proc_Node_Part.All_Proc_Nodes_VP.Values(), 
+// 		  Vel_Npe,
+// 		  Vel_Nnm,
+// 		  Proc_Node_Part.My_Proc_Eles.Values(),
+// 		  Vel_Nod,
+// 		  Pre_Nod,
+// 		  Nem,
+// 		  myid,
+// 		  Soln_Cur_t.Values(), 
+// 		  x_VP);
     
 //     if(myid == 0)
 //     {
