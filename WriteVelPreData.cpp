@@ -3,6 +3,8 @@
 
 #include "WriteVelPreData.h"
 
+using namespace std;
+
 void WriteVelPreData(char* HorVelfilename, 
 		     char* VertVelfilename,
 		     char* Prefilename, 
@@ -29,6 +31,8 @@ void WriteVelPreData(char* HorVelfilename,
       HorVelofile << Data[i * (2 * Size + 1) + j] << "  ";
       VertVelofile << Data[i * (2 * Size + 1) + j + (2 * Size + 1) * (2 * Size + 1)] << "  ";
       
+//       cout << "Data = " << Data[i * (2 * Size + 1) + j + (2 * Size + 1) * (2 * Size + 1)] << endl;
+      
     }
 
     HorVelofile << endl;
@@ -36,6 +40,10 @@ void WriteVelPreData(char* HorVelfilename,
     VertVelofile << endl;
     
   }
+  
+//         int QWERTY;
+//       
+//       cin >> QWERTY;
   
   std::ofstream Preofile(Prefilename, std::ios::out);
   

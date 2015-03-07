@@ -71,8 +71,8 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 64;			// Number of element intervals in the horizontal direction
-const int NY = 64;
+const int NX = 32;			// Number of element intervals in the horizontal direction
+const int NY = 32;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 100;	// Maximum number of time interations
@@ -634,6 +634,12 @@ int main(int argc, char *argv[])
 
       Soln_Next_L.Import(x_VP,CompleteSolution_Importer_VP,Add);
 
+//       std::cout << "X_VP = " << x_VP << endl;
+//       
+//       int QWERTY;
+//       
+//       std::cin >> QWERTY;
+      
       Tol = VectorDiffNorm(Soln_Cur_L.Values(), 
 			Soln_Next_L.Values(), 
 			2 * Vel_Nnm + Pre_Nnm);
@@ -790,20 +796,20 @@ int main(int argc, char *argv[])
       Bio_File_No++;
     }
     
-    A_VP.PutScalar(0.0);
-    b_VP.PutScalar(0.0);
-    Soln_Next_L.PutScalar(0.0);
+//     A_VP.PutScalar(0.0);
+//     b_VP.PutScalar(0.0);
+//     Soln_Next_L.PutScalar(0.0);
     
-    InitialGuess(Proc_Node_Part.All_Proc_Nodes_VP.Values(), 
-		  Vel_Npe,
-		  Vel_Nnm,
-		  Proc_Node_Part.My_Proc_Eles.Values(),
-		  Vel_Nod,
-		  Pre_Nod,
-		  Nem,
-		  myid,
-		  Soln_Cur_t.Values(), 
-		  x_VP);
+//     InitialGuess(Proc_Node_Part.All_Proc_Nodes_VP.Values(), 
+// 		  Vel_Npe,
+// 		  Vel_Nnm,
+// 		  Proc_Node_Part.My_Proc_Eles.Values(),
+// 		  Vel_Nod,
+// 		  Pre_Nod,
+// 		  Nem,
+// 		  myid,
+// 		  Soln_Cur_t.Values(), 
+// 		  x_VP);
     
 //     if(myid == 0)
 //     {
@@ -862,8 +868,8 @@ int main(int argc, char *argv[])
 //     SolnNorm = VectorNorm(Soln_Cur_t.Values(), 
 // 			  2 * Vel_Nnm + Pre_Nnm);
 //     
-//     // Update Vel and Pre here so that Bio has the old and new Vel to use.
-//     Soln_Cur_t = Soln_Cur_L;
+    // Dont update Vel and Pre until here so that BioSparseAssembly has the old and new Vels and Pre to use.
+    Soln_Cur_t = Soln_Cur_L;
 //     
 //     EquibTol = SolnDiffNorm / SolnNorm * 1 / (NX * NX);
 //     
