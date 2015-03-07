@@ -28,11 +28,11 @@ void Conformation(double TIMESTEP,
 		  double T_ZERO,
 		  double L_ZERO,
 		  int Vel_Npe, 
-		  int Pre_Npe,
-		  int Str_Npe, 
+		  int Pre_Npe, 
 		  int Nem, 
 		  int Vel_Nnm,
 		  int N_TRI_QUAD,
+		  int Pre_Nnm,
 		  E_ISDM Vel_Nod, 
 		  E_ISDM Pre_Nod, 
 		  E_SDM Vel_Glxy, 
@@ -41,7 +41,7 @@ void Conformation(double TIMESTEP,
 		  E_SDV Tri_Quad_Wt, 
 		  E_ISDM Ele_Neigh,
 		  int VEL_FLAG, 
-		  int STRESS_FLAG, 
+		  int PRE_FLAG, 
 		  double *Vel, 
 		  double *Vel_Old,
 		  double *Bio,
@@ -86,17 +86,17 @@ void Conformation(double TIMESTEP,
   
   // Pressure terms
   Pre_Elxy.Shape(Pre_Npe, 2);
-//   Pre_Sf.Size(Pre_Npe);
-//   Gdsf.Shape(2, Pre_Npe); 	// derivatives w.r.t. global cooridinates
+  Pre_Sf.Size(Pre_Npe);
+  Gdsf.Shape(2, Pre_Npe); 	// derivatives w.r.t. global cooridinates
   
   // Stress terms
   El_Dep_Str.Shape(2,2);	// The Stress at the departure feet
-  Str_Elxy.Shape(Str_Npe,2);
-  It_Str.Size(Str_Npe);
-  Str_Sf.Size(Str_Npe);
-  Str_Gdsf.Shape(2,Str_Npe);
-  Depart_Str.Size(Str_Npe);
-  El_Str.Shape(4,Str_Npe);
+  Str_Elxy.Shape(Pre_Npe,2);
+  It_Str.Size(3);
+  Str_Sf.Size(Pre_Npe);
+  Str_Gdsf.Shape(2,Pre_Npe);
+  Depart_Str.Size(3);
+  El_Str.Shape(4,Pre_Npe);
   El_Bio.Size(Vel_Npe);
   
   // Other terms
@@ -107,21 +107,20 @@ void Conformation(double TIMESTEP,
   Y_New_Xi_Eta.Size(2);
   Ini_Foot.Size(2);
   Depart_Foot.Size(2);
-  Dep_Sf.Size(Str_Npe);
-  Dep_Gdsf.Shape(2,Str_Npe);
+  Dep_Sf.Size(Pre_Npe);
+  Dep_Gdsf.Shape(2,Pre_Npe);
 
   U_Zero = L_ZERO / T_ZERO;
-
+  
   for (int Ne = 0; Ne <= Nem-1; Ne++) 	// loop over all the elements
   {
-
     for (int i = 0; i <= Pre_Npe-1; i++) // get global coordinates of local nodes of element NE
     {
       Inod = Pre_Nod(Ne,i) - 1;		// Global node number (minus one for indexing) of local node.
       Pre_Elxy(i,0) = Pre_Glxy(Inod,0);  // x-coordinate
       Pre_Elxy(i,1) = Pre_Glxy(Inod,1);  // y-coordinate
     }
-
+      
     for (int i = 0; i <= Vel_Npe-1; i++) 	// get global coordinates of local nodes of element NE
     {
       Vel_Inod = Vel_Nod(Ne,i) - 1;		// Global node number (minus one for indexing) of local node.
@@ -136,7 +135,7 @@ void Conformation(double TIMESTEP,
 
     if(Ne == 0)
     {
-      for (int j = 0; j <= Str_Npe-1; j++)  // loop over element vertex nodes
+      for (int j = 0; j <= Pre_Npe-1; j++)  // loop over element nodes
       {
 	Vel_Inod = Vel_Nod(Ne,j) - 1;
 
@@ -148,8 +147,6 @@ void Conformation(double TIMESTEP,
 	Two_Area = alpha1 + alpha2 + alpha3;
 	x = Vel_Glxy(Vel_Inod, 0);
 	y = Vel_Glxy(Vel_Inod, 1);
-	
-	// Only the vertices of each element are used here
 	x1 = Pre_Elxy(0,0);
 	x2 = Pre_Elxy(1,0);
 	x3 = Pre_Elxy(2,0);
@@ -167,6 +164,15 @@ void Conformation(double TIMESTEP,
 		VEL_FLAG, 
 		Sf, 
 		Vel_Gdsf, 
+		DetJ);
+
+	Shape2d(Xi, 
+		Eta, 
+		Pre_Elxy, 
+		Pre_Npe, 
+		PRE_FLAG, 
+		Pre_Sf, 
+		Gdsf, 
 		DetJ);
 
 	Ini_Foot(0) = x;
@@ -188,33 +194,17 @@ void Conformation(double TIMESTEP,
 	Cur_Ele = Ne + 1;
 	
 	// Compute the stress at the departure foot
-	if(STRESS_FLAG == 1)
+	for (int i = 0; i <= Pre_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
 	{
-	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
-	  {
-	    Inod = Pre_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
-	    Str_Elxy(i,0) = Pre_Glxy(Inod,0);	// x-coordinate
-	    Str_Elxy(i,1) = Pre_Glxy(Inod,1);	// y-coordinate
+	  Inod = Pre_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
+	  Str_Elxy(i,0) = Pre_Glxy(Inod,0);	// x-coordinate
+	  Str_Elxy(i,1) = Pre_Glxy(Inod,1);	// y-coordinate
 
-	    El_Str(0,i) = Str_Old(Inod,0);
-	    El_Str(1,i) = Str_Old(Inod,1);
-	    El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
-	    El_Str(3,i) = Str_Old(Inod,2);
-	  }
-	}
-	else
-	{
-	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
-	  {
-	    Inod = Vel_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
-	    Str_Elxy(i,0) = Vel_Glxy(Inod,0);	// x-coordinate
-	    Str_Elxy(i,1) = Vel_Glxy(Inod,1);	// y-coordinate
+	  El_Str(0,i) = Str_Old(Inod,0);
+	  El_Str(1,i) = Str_Old(Inod,1);
+	  El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
+	  El_Str(3,i) = Str_Old(Inod,2);
 
-	    El_Str(0,i) = Str_Old(Inod,0);
-	    El_Str(1,i) = Str_Old(Inod,1);
-	    El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
-	    El_Str(3,i) = Str_Old(Inod,2);
-	  }
 	}
 
 	alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
@@ -236,24 +226,33 @@ void Conformation(double TIMESTEP,
 	Shape2d(Xi, 
 		Eta, 
 		Str_Elxy, 
-		Str_Npe, 	// Both stress and pressure are linear
-		STRESS_FLAG, 
+		Pre_Npe, 	// Both stress and pressure are linear
+		PRE_FLAG, 
 		Dep_Sf, 	// output
 		Dep_Gdsf, // output
 		DetJ);	// output
 
-	El_Dep_Str(0,0) = 0.0;
-	El_Dep_Str(0,1) = 0.0;
-	El_Dep_Str(1,1) = 0.0;
-	
-	for(int k = 0; k <= Str_Npe - 1; k++)
+	for(int i = 0; i <= 2; i++)
 	{
-	  El_Dep_Str(0,0) += El_Str(0,k) * Dep_Sf(k);
-	  El_Dep_Str(0,1) += El_Str(1,k) * Dep_Sf(k);
-	  El_Dep_Str(1,1) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
+	  It_Str(i) = 0.0;
 	}
 
+	for(int k = 0; k <= Pre_Npe - 1; k++)
+	{
+	  It_Str(0) += El_Str(0,k) * Dep_Sf(k);
+	  It_Str(1) += El_Str(1,k) * Dep_Sf(k);
+	  It_Str(2) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
+	}
+	
+	Depart_Str(0) = It_Str(0);
+	Depart_Str(1) = It_Str(1);
+	Depart_Str(2) = It_Str(2);
+	
+	// This is not the element departure stress but the Stress at the particular departed Guass point
+	El_Dep_Str(0,0) = Depart_Str(0);
+	El_Dep_Str(0,1) = Depart_Str(1);
 	El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
+	El_Dep_Str(1,1) = Depart_Str(2);
 
 	GaussPt_Bio = 0.0;
 	
@@ -280,6 +279,9 @@ void Conformation(double TIMESTEP,
 	
 	BETA = Effective_Pol_Vis * ALPHA * ALPHA;
 
+// 	std::cout << "ALPHA = " << ALPHA << endl;
+// 	std::cout << "BETA = " << BETA << endl;
+	
 	// zeros out Grad_Vel
 	for(int i = 0; i <= 1; i++)
 	{
@@ -356,20 +358,13 @@ void Conformation(double TIMESTEP,
 	  }
 	}
 
-	if(STRESS_FLAG == 1)
-	{
-	  Inod = Pre_Nod(Ne,j) - 1;
+	Inod = Pre_Nod(Ne,j) - 1;
 
-	}
-	else
-	{
-	  Inod = Vel_Nod(Ne,j) - 1;
-	}
-	
-	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
+	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,0);// 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
 	Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
-	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
 
+// 	std::cout << "XX = " << Str_New(Inod, 0) << ", XY = " << Str_New(Inod, 1) << ", YY = " << Str_New(Inod, 2) << endl;
 	
       } // for j
     }
@@ -378,7 +373,7 @@ void Conformation(double TIMESTEP,
     else if((Ne % 2 == 0) && (Ne <= 2 * NX - 2))
     {
       
-      for (int j = 1; j <= Str_Npe - 1; j++)  // loop over nodes 2 and 3 for the first row
+      for (int j = 1; j <= Pre_Npe - 1; j++)  // loop over nodes 2 and 3 for the first row
       {
 	Vel_Inod = Vel_Nod(Ne,j) - 1;
 
@@ -390,8 +385,6 @@ void Conformation(double TIMESTEP,
 	Two_Area = alpha1 + alpha2 + alpha3;
 	x = Vel_Glxy(Vel_Inod, 0);
 	y = Vel_Glxy(Vel_Inod, 1);
-	
-	// Only the vertices of each element are used here
 	x1 = Pre_Elxy(0,0);
 	x2 = Pre_Elxy(1,0);
 	x3 = Pre_Elxy(2,0);
@@ -409,6 +402,15 @@ void Conformation(double TIMESTEP,
 		VEL_FLAG, 
 		Sf, 
 		Vel_Gdsf, 
+		DetJ);
+
+	Shape2d(Xi, 
+		Eta, 
+		Pre_Elxy, 
+		Pre_Npe, 
+		PRE_FLAG, 
+		Pre_Sf, 
+		Gdsf, 
 		DetJ);
 
 	Ini_Foot(0) = x;
@@ -430,35 +432,19 @@ void Conformation(double TIMESTEP,
 	Cur_Ele = Ne + 1;
 	
 	// Compute the stress at the departure foot
-	if(STRESS_FLAG == 1)
+	for (int i = 0; i <= Pre_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
 	{
-	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
-	  {
-	    Inod = Pre_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
-	    Str_Elxy(i,0) = Pre_Glxy(Inod,0);	// x-coordinate
-	    Str_Elxy(i,1) = Pre_Glxy(Inod,1);	// y-coordinate
+	  Inod = Pre_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
+	  Str_Elxy(i,0) = Pre_Glxy(Inod,0);	// x-coordinate
+	  Str_Elxy(i,1) = Pre_Glxy(Inod,1);	// y-coordinate
 
-	    El_Str(0,i) = Str_Old(Inod,0);
-	    El_Str(1,i) = Str_Old(Inod,1);
-	    El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
-	    El_Str(3,i) = Str_Old(Inod,2);
-	  }
-	}
-	else
-	{
-	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
-	  {
-	    Inod = Vel_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
-	    Str_Elxy(i,0) = Vel_Glxy(Inod,0);	// x-coordinate
-	    Str_Elxy(i,1) = Vel_Glxy(Inod,1);	// y-coordinate
+	  El_Str(0,i) = Str_Old(Inod,0);
+	  El_Str(1,i) = Str_Old(Inod,1);
+	  El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
+	  El_Str(3,i) = Str_Old(Inod,2);
 
-	    El_Str(0,i) = Str_Old(Inod,0);
-	    El_Str(1,i) = Str_Old(Inod,1);
-	    El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
-	    El_Str(3,i) = Str_Old(Inod,2);
-	  }
 	}
-	
+
 	alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
 	alpha2 = Str_Elxy(2,0) * Str_Elxy(0,1) - Str_Elxy(0,0) * Str_Elxy(2,1); // x3 * y1 - x1 * y3
 	alpha3 = Str_Elxy(0,0) * Str_Elxy(1,1) - Str_Elxy(1,0) * Str_Elxy(0,1); // x1 * y2 - x2 * y1
@@ -478,24 +464,33 @@ void Conformation(double TIMESTEP,
 	Shape2d(Xi, 
 		Eta, 
 		Str_Elxy, 
-		Str_Npe, 	// Both stress and pressure are linear
-		STRESS_FLAG, 
+		Pre_Npe, 	// Both stress and pressure are linear
+		PRE_FLAG, 
 		Dep_Sf, 	// output
 		Dep_Gdsf, // output
 		DetJ);	// output
 
-	El_Dep_Str(0,0) = 0.0;
-	El_Dep_Str(0,1) = 0.0;
-	El_Dep_Str(1,1) = 0.0;
-	
-	for(int k = 0; k <= Str_Npe - 1; k++)
+	for(int i = 0; i <= 2; i++)
 	{
-	  El_Dep_Str(0,0) += El_Str(0,k) * Dep_Sf(k);
-	  El_Dep_Str(0,1) += El_Str(1,k) * Dep_Sf(k);
-	  El_Dep_Str(1,1) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
+	  It_Str(i) = 0.0;
 	}
 
+	for(int k = 0; k <= Pre_Npe - 1; k++)
+	{
+	  It_Str(0) += El_Str(0,k) * Dep_Sf(k);
+	  It_Str(1) += El_Str(1,k) * Dep_Sf(k);
+	  It_Str(2) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
+	}
+	
+	Depart_Str(0) = It_Str(0);
+	Depart_Str(1) = It_Str(1);
+	Depart_Str(2) = It_Str(2);
+	
+	// This is not the element departure stress but the Stress at the particular departed Guass point
+	El_Dep_Str(0,0) = Depart_Str(0);
+	El_Dep_Str(0,1) = Depart_Str(1);
 	El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
+	El_Dep_Str(1,1) = Depart_Str(2);
 
 	// zeros out Grad_Vel
 	for(int i = 0; i <= 1; i++)
@@ -581,20 +576,14 @@ void Conformation(double TIMESTEP,
 	  }
 	}
 
-	if(STRESS_FLAG == 1)
-	{
-	  Inod = Pre_Nod(Ne,j) - 1;
+	Inod = Pre_Nod(Ne,j) - 1;
 
-	}
-	else
-	{
-	  Inod = Vel_Nod(Ne,j) - 1;
-	}
-	
-	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
+	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,0);// 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
 	Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
-	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(1,1);//1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
 
+// 	std::cout << "XX = " << Str_New(Inod, 0) << ", XY = " << Str_New(Inod, 1) << ", YY = " << Str_New(Inod, 2) << endl;
+	
       } // for j
     }
       
@@ -604,7 +593,7 @@ void Conformation(double TIMESTEP,
     // or Ne is an odd element larger than the those in the first row.
     else if(((Ne + 1) % (2 * NX) == 2) || (Ne % 2 == 0))
     {
-      JJ = 2; // Only solve at the 3rd node of each element
+      JJ = Pre_Npe - 1; // Only solve at the 3rd node of each element
     
       Vel_Inod = Vel_Nod(Ne,JJ) - 1;
 
@@ -616,8 +605,6 @@ void Conformation(double TIMESTEP,
       Two_Area = alpha1 + alpha2 + alpha3;
       x = Vel_Glxy(Vel_Inod, 0);
       y = Vel_Glxy(Vel_Inod, 1);
-      
-      // Only the vertices of each element are used here
       x1 = Pre_Elxy(0,0);
       x2 = Pre_Elxy(1,0);
       x3 = Pre_Elxy(2,0);
@@ -635,6 +622,15 @@ void Conformation(double TIMESTEP,
 	      VEL_FLAG, 
 	      Sf, 
 	      Vel_Gdsf, 
+	      DetJ);
+
+      Shape2d(Xi, 
+	      Eta, 
+	      Pre_Elxy, 
+	      Pre_Npe, 
+	      PRE_FLAG, 
+	      Pre_Sf, 
+	      Gdsf, 
 	      DetJ);
 
       Ini_Foot(0) = x;
@@ -656,35 +652,19 @@ void Conformation(double TIMESTEP,
       Cur_Ele = Ne + 1;
       
       // Compute the stress at the departure foot
-      if(STRESS_FLAG == 1)
-	{
-	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
-	  {
-	    Inod = Pre_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
-	    Str_Elxy(i,0) = Pre_Glxy(Inod,0);	// x-coordinate
-	    Str_Elxy(i,1) = Pre_Glxy(Inod,1);	// y-coordinate
+      for (int i = 0; i <= Pre_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
+      {
+	Inod = Pre_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
+	Str_Elxy(i,0) = Pre_Glxy(Inod,0);	// x-coordinate
+	Str_Elxy(i,1) = Pre_Glxy(Inod,1);	// y-coordinate
 
-	    El_Str(0,i) = Str_Old(Inod,0);
-	    El_Str(1,i) = Str_Old(Inod,1);
-	    El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
-	    El_Str(3,i) = Str_Old(Inod,2);
-	  }
-	}
-	else
-	{
-	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
-	  {
-	    Inod = Vel_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
-	    Str_Elxy(i,0) = Vel_Glxy(Inod,0);	// x-coordinate
-	    Str_Elxy(i,1) = Vel_Glxy(Inod,1);	// y-coordinate
+	El_Str(0,i) = Str_Old(Inod,0);
+	El_Str(1,i) = Str_Old(Inod,1);
+	El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
+	El_Str(3,i) = Str_Old(Inod,2);
 
-	    El_Str(0,i) = Str_Old(Inod,0);
-	    El_Str(1,i) = Str_Old(Inod,1);
-	    El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
-	    El_Str(3,i) = Str_Old(Inod,2);
-	  }
-	}
-      
+      }
+
       alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
       alpha2 = Str_Elxy(2,0) * Str_Elxy(0,1) - Str_Elxy(0,0) * Str_Elxy(2,1); // x3 * y1 - x1 * y3
       alpha3 = Str_Elxy(0,0) * Str_Elxy(1,1) - Str_Elxy(1,0) * Str_Elxy(0,1); // x1 * y2 - x2 * y1
@@ -704,25 +684,34 @@ void Conformation(double TIMESTEP,
       Shape2d(Xi, 
 	      Eta, 
 	      Str_Elxy, 
-	      Str_Npe, 	// Both stress and pressure are linear
-	      STRESS_FLAG, 
+	      Pre_Npe, 	// Both stress and pressure are linear
+	      PRE_FLAG, 
 	      Dep_Sf, 	// output
 	      Dep_Gdsf, // output
 	      DetJ);	// output
 
-      El_Dep_Str(0,0) = 0.0;
-      El_Dep_Str(0,1) = 0.0;
-      El_Dep_Str(1,1) = 0.0;
-      
-      for(int k = 0; k <= Str_Npe - 1; k++)
+      for(int i = 0; i <= 2; i++)
       {
-	El_Dep_Str(0,0) += El_Str(0,k) * Dep_Sf(k);
-	El_Dep_Str(0,1) += El_Str(1,k) * Dep_Sf(k);
-	El_Dep_Str(1,1) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
+	It_Str(i) = 0.0;
       }
 
+      for(int k = 0; k <= Pre_Npe - 1; k++)
+      {
+	It_Str(0) += El_Str(0,k) * Dep_Sf(k);
+	It_Str(1) += El_Str(1,k) * Dep_Sf(k);
+	It_Str(2) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
+      }
+      
+      Depart_Str(0) = It_Str(0);
+      Depart_Str(1) = It_Str(1);
+      Depart_Str(2) = It_Str(2);
+      
+      // This is not the element departure stress but the Stress at the particular departed Guass point
+      El_Dep_Str(0,0) = Depart_Str(0);
+      El_Dep_Str(0,1) = Depart_Str(1);
       El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
-	
+      El_Dep_Str(1,1) = Depart_Str(2);
+
       // zeros out Grad_Vel
       for(int i = 0; i <= 1; i++)
       {
@@ -744,6 +733,10 @@ void Conformation(double TIMESTEP,
 	}
       }
 
+//       std::cout << "Vel_Gdsf = " << Vel_Gdsf << endl;
+//       std::cout << "El_Vel = " << El_Vel << endl;
+//       std::cout << "Gradu = " << Grad_Vel << endl;
+      
       // The invere of gradu times its determinant
       Det_Inv_Grad_Vel(0,0) = Grad_Vel(1,1);
       Det_Inv_Grad_Vel(0,1) = -Grad_Vel(0,1);
@@ -809,19 +802,13 @@ void Conformation(double TIMESTEP,
 	  }
 	}
       
-      if(STRESS_FLAG == 1)
-      {
-	Inod = Pre_Nod(Ne,JJ) - 1;
-
-      }
-      else
-      {
-	Inod = Vel_Nod(Ne,JJ) - 1;
-      }
+      Inod = Pre_Nod(Ne, JJ) - 1;
 
       Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
       Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
       Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+      
+//       std::cout << "XX = " << Str_New(Inod, 0) << ", XY = " << Str_New(Inod, 1) << ", YY = " << Str_New(Inod, 2) << endl;
 
     }// end if
   } // for NE

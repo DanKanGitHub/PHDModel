@@ -14,7 +14,7 @@ typedef Epetra_SerialDenseMatrix E_SDM;
 typedef Epetra_IntSerialDenseMatrix E_ISDM;
 
 void InitialStr(int Nem, 
-		int Str_Npe,
+		int Pre_Npe,
 		double Sol_Vis,
 		double Poly_Vis,
 		double Sol_Density,

@@ -23,12 +23,10 @@ void SparseAssembly(double Sol_Vis,
 		    int NGP,
 		    int Vel_Npe, 
 		    int Pre_Npe,
-		    int Str_Npe,
 		    int Nem, 
 		    int N_TRI_QUAD,
 		    int Vel_Nnm,
 		    int Pre_Nnm,
-		    int Str_Nnm,
 		    E_ISDM Vel_Nod,
 		    E_ISDM Pre_Nod,
 		    E_ISDM Vel_Nod_BC_Hor,
@@ -39,7 +37,6 @@ void SparseAssembly(double Sol_Vis,
 		    E_ISDM Ele_Neigh,
 		    int VEL_FLAG,
 		    int PRE_FLAG, 
-		    int STRESS_FLAG,
 		    E_SDM Tri_Quad_Pt, 
 		    E_SDV Tri_Quad_Wt,
 		    E_SDM GAUSPT,
@@ -105,6 +102,14 @@ void SparseAssembly(double Sol_Vis,
   // RHS
   double b_Values[2]; //, Temp_Values[2 * Vel_Nnm + Pre_Nnm];
   int b_Indices[2]; //, Temp_Indices[2 * Vel_Nnm + Pre_Nnm];
+  
+  // Create data array
+//   double Data[15];
+//   double * DataPtr = Data;
+  
+  // Create Index array
+//   int Index[15];
+//   int * IndexPtr = Index;
 
   El_Vel.Shape(2,Vel_Npe);
   El_Bio.Size(Vel_Npe);
@@ -126,12 +131,18 @@ void SparseAssembly(double Sol_Vis,
   Pre_Gdsf.Shape(2,Pre_Npe); 		// derivatives w.r.t. global cooridinates
   
   // Stress terms
-  El_Str.Shape(4,Str_Npe);
-  Gp_Str.Size(Str_Npe);			// Stress at a Gauss point
+  El_Str.Shape(4,3);
+  Gp_Str.Size(3);			// Stress at a Gauss point
   
   // Other terms
   Dep_Gdsf.Shape(2,Vel_Npe);
   Dep_Sf.Size(Vel_Npe);
+
+  // PDE coefffiecients
+  // I recycle these variables in the calculation below
+//   a00 = RE / TIMESTEP;
+//   a11 = NEW_VIS;
+//   a22 = a11 / 2.0;
 
   U_Zero = L_ZERO / T_ZERO;
   
@@ -156,29 +167,11 @@ void SparseAssembly(double Sol_Vis,
 	Pre_Inod = Pre_Nod(Ne,i)-1;		// Global node number (minus one for indeXing) of local node.
 	Pre_Elxy(i,0) = Pre_Glxy(Pre_Inod,0);	// x-coordinate of the pressure
 	Pre_Elxy(i,1) = Pre_Glxy(Pre_Inod,1);	// y-coordinate
-      }
-      
-      if(STRESS_FLAG == 1)
-      {
-	for (int i = 0; i <= Str_Npe-1; i++) 	// get global coordinates of local nodes of element Ne
-	{
-	  Pre_Inod = Pre_Nod(Ne,i)-1;
-	  El_Str(0,i) = Str(Pre_Inod,0);
-	  El_Str(1,i) = Str(Pre_Inod,1);
-	  El_Str(2,i) = Str(Pre_Inod,1); // The Stress is symmetric
-	  El_Str(3,i) = Str(Pre_Inod,2);
-	}
-      }
-      else
-      {
-	for (int i = 0; i <= Str_Npe-1; i++) 	// get global coordinates of local nodes of element Ne
-	{
-	  Vel_Inod = Vel_Nod(Ne,i) - 1;
-	  El_Str(0,i) = Str(Vel_Inod,0);
-	  El_Str(1,i) = Str(Vel_Inod,1);
-	  El_Str(2,i) = Str(Vel_Inod,1); // The Stress is symmetric
-	  El_Str(3,i) = Str(Vel_Inod,2);
-	}
+	
+	El_Str(0,i) = Str(Pre_Inod,0);
+	El_Str(1,i) = Str(Pre_Inod,1);
+	El_Str(2,i) = Str(Pre_Inod,1); // The Stress is symmetric
+	El_Str(3,i) = Str(Pre_Inod,2);
       }
 
       for (int Ni = 0; Ni <= N_TRI_QUAD-1; Ni++) // loop over quadrature points
@@ -214,23 +207,11 @@ void SparseAssembly(double Sol_Vis,
 	}
 
 	// Stress at a Guass point
-	if(STRESS_FLAG == 1)
+	for(int j = 0; j <= Pre_Npe - 1; j++)
 	{
-	  for(int j = 0; j <= Str_Npe - 1; j++)
-	  {
-	    Gp_Str(0) += El_Str(0,j) * Pre_Sf(j);
-	    Gp_Str(1) += El_Str(1,j) * Pre_Sf(j);
-	    Gp_Str(2) += El_Str(3,j) * Pre_Sf(j);
-	  }
-	}
-	else
-	{
-	  for(int j = 0; j <= Str_Npe - 1; j++)
-	  {
-	    Gp_Str(0) += El_Str(0,j) * Vel_Sf(j);
-	    Gp_Str(1) += El_Str(1,j) * Vel_Sf(j);
-	    Gp_Str(2) += El_Str(3,j) * Vel_Sf(j);
-	  }
+	  Gp_Str(0) += El_Str(0,j) * Pre_Sf(j);
+	  Gp_Str(1) += El_Str(1,j) * Pre_Sf(j);
+	  Gp_Str(2) += El_Str(3,j) * Pre_Sf(j);
 	}
 
 	// Convert the gauss point into cartesian coordinates for the associated element.
@@ -319,6 +300,7 @@ void SparseAssembly(double Sol_Vis,
 	// Zero out Iterative velocity
 	for(int k = 0; k <= 1; k++)
 	{
+// 	  It_Vel(k) = 0.0;
 	  Depart_Vel(k) = 0.0;
 	}
 	
@@ -368,10 +350,29 @@ void SparseAssembly(double Sol_Vis,
 
 	Rey_Num = Effective_Den * U_Zero * L_ZERO / Effective_Vis;
 
+// 	Effective_Den = 1.0; // 0.2 * DENSITY_BIO + 0.8 * DENSITY_WATER;
+// 	P_Zero = Effective_Den * U_Zero * U_Zero;
+// 	Effective_Vis = (Poly_Vis + Sol_Vis) / (T_ZERO * P_Zero) / 2;
+// // 	Effective_Sol_Vis = 1079.0 / 1080.0 * Effective_Vis;
+// // 	Effective_Pol_Vis = (1 - 1079.0 / 1080.0) * Effective_Vis;
+// 	Rey_Num = Effective_Den * U_Zero * L_ZERO / Effective_Vis;
+	
 	a00 = Rey_Num / TIMESTEP;
 	a11 = RetardDivRelax * Effective_Vis; // Effective Non-Dimensional Solvent Viscosity
 	a22 = a11 / 2.0;
+	
+// 	Depart_a00 = a00; // Just testing
+	
+// 	Depart_Vel(0) = It_Vel(0);
+// 	Depart_Vel(1) = It_Vel(1);
 
+// 	if(myid == 0)
+// 	{
+// 	  std::cout << "Here 1" << endl;
+// 	  int QWERTY;
+// 	  std::cin >> QWERTY;
+// 	}
+	
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // !!!!!!!!!!!!!!! UPPER MATRICES START HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -383,20 +384,57 @@ void SparseAssembly(double Sol_Vis,
 
 	  // The row of the global matrix
 	  ii = Vel_Nod(Ne,i) - 1;
-
+	  
+// 	  if(myid == 0)
+// 	  {
+// 	    
+// 	    std::cout << "ii = " << ii << endl;
+// 	    
+// 	  }
+	  
 	  if(All_Proc_Nodes_VP(ii) == myid)
 	  {
 	    if(Vel_Nod_BC_Hor(Ne,i) != 1) // global node ii is not a BC
 	    {
-
+	      
+// 	      if(myid == 0)
+// 	      {
+// 		std::cout << "Here 1c" << endl;
+// 		int QWERTY;
+// 		std::cin >> QWERTY;
+// 	      }
+	      
 	      //RHS Vector
 	      b_Values[0] = Const * (Vel_Sf(i) * Depart_a00 * Depart_Vel(0) - Bio_Depart_Weight * (
 		Vel_Gdsf(0,i) * Gp_Str(0) + Vel_Gdsf(1,i) * Gp_Str(1)));
+
+// 	      b_Values[0] = Const * (Vel_Sf(i) * Depart_a00 * Depart_Vel(0) - Vel_Gdsf(0,i) * Gp_Str(0) - Vel_Gdsf(1,i) * Gp_Str(1));
+
+    // 	  b_Dense(ii) += b_Values[0];
 
 	      b_Indices[0] = ii;
 
 	      Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
 
+// 	      if(ii == 9 & myid == 1)
+// 	      {
+// 		std::cout << "ii = 6" << endl;
+// 		std::cout << "Ne = " << Ne << endl;
+// 		std::cout << "i = " << i << endl;
+// 		std::cout << "b_Values[0] = " << b_Values[0] << endl;
+// 		std::cout << "Const = " << Const << endl;
+// 		std::cout << "Vel_Sf(i) = " << Vel_Sf(i) << endl;
+// 		std::cout << "a00 = " << a00 << endl;
+// 		std::cout << "Depart_Vel(0) = " << Depart_Vel(0) << endl;
+// 		std::cout << "Vel_Gdsf(0,i) = " << Vel_Gdsf(0,i) << endl;
+// 		std::cout << "Gp_Str(0) = " << Gp_Str(0) << endl;
+// 		std::cout << "Vel_Gdsf(1,i) = " << Vel_Gdsf(1,i) << endl;
+// 		std::cout << "Gp_Str(1) = " << Gp_Str(1) << endl;
+// 		
+// 		int GHLKJ;
+// 		std::cin >> GHLKJ;
+// 	      }
+	      
 	      if(Error != 0)
 	      {
 		std::cout << "Broke 2" << endl;
@@ -417,6 +455,8 @@ void SparseAssembly(double Sol_Vis,
 
 		b_Values[0] = Nat_Vel(0);
 
+    // 	    b_Dense(ii) += b_Values[0];
+
 		b_Indices[0] = ii;
 
 		Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
@@ -433,23 +473,42 @@ void SparseAssembly(double Sol_Vis,
 
 		// The column of the global matrix
 		jj = Vel_Nod(Ne,j) - 1;
+		
+// 		if(myid == 0)
+// 		{
+// 		  
+// 		  std::cout << "jj = " << jj << endl;
+// 		  
+// 		}
+		
+// 		if(myid == 0)
+// 		{
+// 		  std::cout << "Here 1b" << endl;
+// 		  int QWERTY;
+// 		  std::cin >> QWERTY;
+// 		}
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!! A11 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		
+  // 	      if(All_Proc_Nodes_VP(jj) == myid)
+  // 	      {
+		
+		  if(Vel_Nod_BC_Hor(Ne,j) != 1) // global node jj is not a BC  DOesn't matter if the column is a Natural BC
+		  {
 
-		if(Vel_Nod_BC_Hor(Ne,j) != 1) // global node jj is not a BC  DOesn't matter if the column is a Natural BC
-		{
+		    Values1[IndexCounter] = Const * (a11 * Vel_Gdsf(0,i) * Vel_Gdsf(0,j)
+		      + a22 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j) + a00 * Vel_Sf(i) * Vel_Sf(j));
+		    
+		    Indices[IndexCounter] = jj;
+		    
+      // 	      A_Dense(ii,jj) += Values1[IndexCounter];
 
-		  Values1[IndexCounter] = Const * (a11 * Vel_Gdsf(0,i) * Vel_Gdsf(0,j)
-		    + a22 * Vel_Gdsf(1,i) * Vel_Gdsf(1,j) + a00 * Vel_Sf(i) * Vel_Sf(j));
-		  
-		  Indices[IndexCounter] = jj;
+		    IndexCounter++;
 
-		  IndexCounter++;
-
-		} // if jj != 1
-
+		  } // if jj != 1
+  // 	      }
 		
 		if(Vel_Nod_BC_Hor(Ne,j) == 1) // column of non-EC row is an EC
 		{
@@ -470,6 +529,8 @@ void SparseAssembly(double Sol_Vis,
 
 		  b_Values[0] = -Temp_A11_Global * Essen_Vel(0);
 
+    // 	      b_Dense(ii) += b_Values[0];
+
 		  b_Indices[0] = ii;
 
 		  Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
@@ -483,85 +544,118 @@ void SparseAssembly(double Sol_Vis,
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!! A12 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-		if(Vel_Nod_BC_Ver(Ne,j) != 1) // global node jj is not a BC  DOesn't matter if the column is a Natural BC
-		{
-
-		  Values1[IndexCounter] = Const * a22 * Vel_Gdsf(0,i) * Vel_Gdsf(1,j);
-		  
-		  Indices[IndexCounter] = jj + Vel_Nnm;
-
-		  IndexCounter++;
-		} // if jj != 1
-		else // if(Vel_Nod_BC_Ver(Ne,j) == 1) // column of non-EC row is an EC
-		{
-
-		  // RHS = RHS - A(ii,jj) * EBC
-		  x = Vel_Glxy(jj,0);
-		  y = Vel_Glxy(jj,1);
-		  
-		  VelEssenBoundary2d(NX,
-				    Vel_Nnm,
-				    jj,
-				    x,
-				    y,
-				    Essen_Vel);
-
-		  Temp_A12_Global = Const * a22 * Vel_Gdsf(0,i) * Vel_Gdsf(1,j);
-		  
-		  b_Values[0] = -Temp_A12_Global * Essen_Vel(1);
-
-		  b_Indices[0] = ii;
-		  
-		  Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
-		  if(Error != 0)
+    
+// 		if(myid == 0)
+// 		{
+// 		  std::cout << "Here 1a" << endl;
+// 		  int QWERTY;
+// 		  std::cin >> QWERTY;
+// 		}
+    
+  // 	      if(All_Proc_Nodes_VP(jj + Vel_Nnm) == myid)
+  // 	      {
+		  if(Vel_Nod_BC_Ver(Ne,j) != 1) // global node jj is not a BC  DOesn't matter if the column is a Natural BC
 		  {
-		    std::cout << "Broke 5" << endl;
-		    Error = 0;
-		  }
-		} // if jj = 1
+
+		    Values1[IndexCounter] = Const * a22 * Vel_Gdsf(0,i) * Vel_Gdsf(1,j);
+		    
+		    Indices[IndexCounter] = jj + Vel_Nnm;
+
+      // 	      A_Dense(ii,jj + Vel_Nnm) += Values1[IndexCounter];
+
+		    IndexCounter++;
+		  } // if jj != 1
+		  else // if(Vel_Nod_BC_Ver(Ne,j) == 1) // column of non-EC row is an EC
+		  {
+
+		    // RHS = RHS - A(ii,jj) * EBC
+		    x = Vel_Glxy(jj,0);
+		    y = Vel_Glxy(jj,1);
+		    
+		    VelEssenBoundary2d(NX,
+				      Vel_Nnm,
+				      jj,
+				      x,
+				      y,
+				      Essen_Vel);
+
+		    Temp_A12_Global = Const * a22 * Vel_Gdsf(0,i) * Vel_Gdsf(1,j);
+		    
+		    b_Values[0] = -Temp_A12_Global * Essen_Vel(1);
+
+      // 	      b_Dense(ii) += b_Values[0];
+
+		    b_Indices[0] = ii;
+		    
+		    Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
+		    if(Error != 0)
+		    {
+		      std::cout << "Broke 5" << endl;
+		      Error = 0;
+		    }
+		  } // if jj = 1
+  // 	      }
 	      } // vel j
 
 	      // PRE COLUMNS CONT
 	      for (int k = 0; k <= Pre_Npe-1; k++)
 	      {
 		kk = Pre_Nod(Ne,k) - 1;
+		
+  // 	      if(All_Proc_Nodes_VP(kk + 2 * Vel_Nnm) == myid)
+  // 	      {
 
-		if(Pre_Nod_BC(Ne,k) != 1)
-		{
-		  // From B1
-		  Values1[IndexCounter] = -Const * Vel_Gdsf(0,i) * Pre_Sf(k);
-
-		  Indices[IndexCounter] = kk + 2 * Vel_Nnm;
-		  
-		  IndexCounter++;
-		}
-		else // if(Pre_Nod_BC(Ne,k) == 1)
-		{
-
-		  // RHS = RHS - A(ii,jj) * EBC
-		  x = Pre_Glxy(kk,0);
-		  y = Pre_Glxy(kk,1);
-		  Essen_Pre = PreEssenBoundary2d(x,
-						  y);
-		  
-		  // Top Row
-		  Temp_B1_Global = -Const * Vel_Gdsf(0,i) * Pre_Sf(k);
-
-		  b_Values[0] = -Temp_B1_Global * Essen_Pre;
-
-		  b_Indices[0] = ii;
-
-		  Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
-		  
-		  if(Error != 0)
+		  if(Pre_Nod_BC(Ne,k) != 1)
 		  {
-		    std::cout << "Broke 6" << endl;
-		    Error = 0;
-		  }
-		} // if kk
-	      } // pre k
+		    // From B1
+		    Values1[IndexCounter] = -Const * Vel_Gdsf(0,i) * Pre_Sf(k);
 
+      // 	      A_Dense(ii, kk + 2 * Vel_Nnm) += Values1[IndexCounter];
+
+		    Indices[IndexCounter] = kk + 2 * Vel_Nnm;
+		    
+		    IndexCounter++;
+		  }
+		  else // if(Pre_Nod_BC(Ne,k) == 1)
+		  {
+
+		    // RHS = RHS - A(ii,jj) * EBC
+		    x = Pre_Glxy(kk,0);
+		    y = Pre_Glxy(kk,1);
+		    Essen_Pre = PreEssenBoundary2d(x,
+						    y);
+		    
+		    // Top Row
+		    Temp_B1_Global = -Const * Vel_Gdsf(0,i) * Pre_Sf(k);
+
+		    b_Values[0] = -Temp_B1_Global * Essen_Pre;
+
+		    b_Indices[0] = ii;
+		    
+      // 	      b_Dense(ii) += b_Values[0];
+		    
+		    Error = b.SumIntoGlobalValues(1, b_Values, b_Indices);
+		    
+		    if(Error != 0)
+		    {
+		      std::cout << "Broke 6" << endl;
+		      Error = 0;
+		    }
+		  } // if kk
+  // 	      }
+	      } // pre k
+	      
+    // 	  std::cout << "ii = " << ii << endl;
+    // 	  for(int i = 0; i < IndexCounter; i++)
+    // 	  {
+    // 	    
+    // 	   std::cout << "A(" << ii << "," << Indices[i] << ") = " << Values1[i] << endl; 
+    // 	    
+    // 	  }
+    // 	  
+    // 	  int GHF;
+    // 	  std::cin >> GHF;
+	      
 	      //Build Global Matrix A one row at a time
 	      Error = A.SumIntoGlobalValues(ii, IndexCounter, Values1, Indices);
 	      
@@ -574,7 +668,14 @@ void SparseAssembly(double Sol_Vis,
 	    } // if ii != 1
 	    else // if(Vel_Nod_BC_Hor(Ne,i) == 1) // Essential BC on this row
 	    {
-
+	      
+// 	      if(myid == 0)
+// 	      {
+// 		std::cout << "myid = " << myid << endl;
+// 		std::cout << "Here 1d" << endl;
+// 		std::cout << "ii = " << ii << endl;
+// 	      }
+	      
 	      // RHS = EBC;
 	      x = Vel_Glxy(ii,0);
 	      y = Vel_Glxy(ii,1);

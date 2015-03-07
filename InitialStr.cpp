@@ -6,7 +6,7 @@
 #include "InitialStr.h"
 
 void InitialStr(int Nem, 
-		int Str_Npe,
+		int Pre_Npe,
 		double Sol_Vis,
 		double Poly_Vis,
 		double Sol_Density,
@@ -32,7 +32,7 @@ void InitialStr(int Nem,
 
   for(int Ne = 0; Ne < Nem; Ne++)
   {
-    for(int Np = 0; Np < Str_Npe; Np++)
+    for(int Np = 0; Np < Pre_Npe; Np++)
     {
 
       Bio_GP = Vel_Nod(Ne, Np) - 1;
