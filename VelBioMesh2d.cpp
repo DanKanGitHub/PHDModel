@@ -112,15 +112,7 @@ void VelBioMesh2d(double dx,
   Nod_BC_Hor.Shape(Nem,Npe);
   Nod_BC_Ver.Shape(Nem,Npe);
   Bio_Nod_BC.Shape(Nem,Npe);
-  // Initialize
-//     for(int i = 0; i <= Nem - 1; i++)
-//     {
-//       for(int j = 0; j <= Npe - 1; j++)
-//       {
-// 	Nod(i,j,0) = 0;
-//       }
-//     }
-  
+
   // global coordinate of nodes
   for (int i = 0; i <= Nnm-1; i++)
   {
