@@ -76,8 +76,9 @@ const int NY = 32;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 100;	// Maximum number of time interations
-const int VEL_FLAG = 2;			// Program flags
+const int VEL_FLAG = 2;			// Program flags: 1 for linear and 2 for quadratic
 const int PRE_FLAG = 1;
+const int STR_FLAG = 1;
 const int Write_Time_Steps_Skipped = 1;
 
 const double XL = 0.0;			// coordinate of left boundary element
