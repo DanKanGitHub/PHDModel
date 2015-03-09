@@ -26,6 +26,7 @@
 #include <ostream>
 #include "VelBioMesh2d.h"
 #include "PreMesh2d.h"
+#include "StrMesh2d.h"
 #include "SparseAssembly.h"
 #include "EquibSparseAssembly.h"
 #include "QuadPtWt.h"
@@ -76,9 +77,11 @@ const int NY = 32;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
 const int MAX_TIME_STEP_NUM = 100;	// Maximum number of time interations
-const int VEL_FLAG = 2;			// Program flags: 1 for linear and 2 for quadratic
+
+const int VEL_FLAG = 2;			// Program flags 1 = linear, 2 = quadratic
 const int PRE_FLAG = 1;
-const int STR_FLAG = 1;
+const int STRESS_FLAG = 2;
+
 const int Write_Time_Steps_Skipped = 1;
 
 const double XL = 0.0;			// coordinate of left boundary element
@@ -121,25 +124,24 @@ int main(int argc, char *argv[])
   // Velocity is NNMX2, Depart_Vel is Gaus_Pt_NumX2
   E_SDM Vel_Glxy, Vel_Old;
   E_ISDM Vel_Nod, Vel_Nod_BC_Hor, Vel_Nod_BC_Ver;
-  E_SDM VelVertOutPut, VelHorOutPut;
   E_SDV Vel_Norm;
   int Vel_Npe, Vel_Nnm;
   double Tol;
   
   // Presure Related
-  E_SDM Pre_Glxy, PreOutPut;
+  E_SDM Pre_Glxy;
   E_ISDM Pre_Nod, Pre_Nod_BC;
   E_SDV Pre_Norm;
   int Pre_Npe, Pre_Nnm;
 
   // Stress Related
   // Stess is NNMX3
-  E_SDM Str, Str_New, Str_Old;
-  E_SDM Stress1OutPut, Stress2OutPut, Stress3OutPut;
+  E_SDM Str, Str_New, Str_Old, Str_Glxy;
+  E_ISDM Str_Nod;
+  int Str_Npe, Str_Write_Size, Str_Nnm;
   
   // Bio Related
   E_SDV Bio_Old, Bio_Norm;
-  E_SDM BioOutPut;
   E_ISDM Bio_Nod_BC;
   
   // Other
@@ -155,15 +157,6 @@ int main(int argc, char *argv[])
   char StrXYFilename[100];
   char StrYYFilename[100];
   char BioFilename[100];
-
-  // Delete these soon
-  VelVertOutPut.Shape(2 * NX + 1, 2 * NX + 1);
-  VelHorOutPut.Shape(2 * NX + 1, 2 * NX + 1);
-  PreOutPut.Shape(NX + 1, NX + 1);
-  Stress1OutPut.Shape(NX + 1, NX + 1);
-  Stress2OutPut.Shape(NX + 1, NX + 1);
-  Stress3OutPut.Shape(NX + 1, NX + 1);
-  BioOutPut.Shape(2 * NX + 1, 2 * NX + 1);
   
   // Gaussian quadrature points and weights for 1d boundary integration, NGP = 1,2 3, or 4
   // In this code it is intended that NGP = 4
@@ -235,7 +228,29 @@ int main(int argc, char *argv[])
 	    Pre_Glxy, 		// output
 	    Pre_Nod,		// output
 	    Pre_Nod_BC);	// output
+  
+  StrMesh2d(dx, 
+	     dy, 
+	     XL,
+	     YB,
+	     STRESS_FLAG,
+	     NX, 
+	     NY,
+	     Nem, 
+	     Str_Nnm, 
+	     Str_Npe, 
+	     Str_Glxy, 
+	     Str_Nod);
 
+  if(STRESS_FLAG == 1)
+  {
+    Str_Write_Size = NX + 1;
+  }
+  else
+  {
+    Str_Write_Size = 2 * NX + 1;
+  }
+  
   ProcNodePartitionClass Proc_Node_Part;
   
   Proc_Node_Part.ProcNodePartition(myid,
@@ -306,10 +321,10 @@ int main(int argc, char *argv[])
   A_Bio.FillComplete();
   
   // Velocity, Pressure and Stress Data
-  Str.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-  Str_New.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-  Str_New.Shape(Pre_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
-  Str_Old.Shape(Pre_Nnm,3);
+  Str.Shape(Str_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
+  Str_New.Shape(Str_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
+  Str_New.Shape(Str_Nnm,3); // Only Pre_Nnm X 3 because the stress is symmetric
+  Str_Old.Shape(Str_Nnm,3);
 
   // Initialize the sizes of the LHS matrices and RHS vectors
   Vel_Norm.Size(2 * Vel_Nnm);
@@ -332,18 +347,18 @@ int main(int argc, char *argv[])
   }
 
   InitialStr(Nem, 
-	     Pre_Npe,
-	     SOL_NEW_VIS,
-	     POL_NEW_VIS,
-	     DENSITY_WATER,
-	     DENSITY_BIO,
-	     L_ZERO,
-	     T_ZERO,
-	     Vel_Nod,
-	     Pre_Nod,
-	     Pre_Glxy, 
-	     Bio_Soln_Cur_t.Values(),
-	     Str); // Size Pre_NnmX3, the stress tensor is symmetric, output
+	    Str_Npe,
+	    SOL_NEW_VIS,
+	    POL_NEW_VIS,
+	    DENSITY_WATER,
+	    DENSITY_BIO,
+	    L_ZERO,
+	    T_ZERO,
+	    Vel_Nod,
+	    Str_Nod,
+	    Str_Glxy, 
+	    Bio_Soln_Cur_t.Values(),
+	    Str); // Size Pre_NnmX3, the stress tensor is symmetric, output
 
   File_No = 0;
   Diff_File_No = 0;
@@ -379,7 +394,7 @@ int main(int argc, char *argv[])
 	       StrXYFilename,
 	       StrYYFilename,
 	       Str, 
-	       NX + 1);
+	       Str_Write_Size);
   
   File_No++;
   Diff_File_No++;
@@ -497,11 +512,6 @@ int main(int argc, char *argv[])
 			  A_Bio, 
 			  b_Bio);
 
-//     std::cout << "A_Bio = " << A_Bio << endl;
-//     
-//     int ghjk;
-//     std::cin >> ghjk;
-    
     Prec_Bio->Compute();
     
     Solver_Bio.Iterate(1000, DIFF_TOL);
@@ -550,7 +560,6 @@ int main(int argc, char *argv[])
   
     // Initialize tolerances
     Tol = 1.0;
-//     Pre_Tol = 1.0;
 
     Soln_Cur_L = Soln_Cur_t;
     Bio_Soln_Next_t = Bio_Soln_Cur_t;
@@ -579,8 +588,6 @@ int main(int argc, char *argv[])
 		    myid,
 		    Soln_Cur_L.Values(), 
 		    x_VP);
-	
-// 	Solver_VP.SetAztecOption(AZ_pre_calc, AZ_reuse);
       }
       
       if(myid == 0)
@@ -601,10 +608,12 @@ int main(int argc, char *argv[])
 		      NGP,
 		      Vel_Npe, 
 		      Pre_Npe, 
+		      Str_Npe,
 		      Nem, 
 		      N_TRI_QUAD,
 		      Vel_Nnm,
 		      Pre_Nnm,
+		      Str_Nnm,
 		      Vel_Nod, 
 		      Pre_Nod,
 		      Vel_Nod_BC_Hor,
@@ -615,6 +624,7 @@ int main(int argc, char *argv[])
 		      Ele_Neigh,
 		      VEL_FLAG, 
 		      PRE_FLAG, 
+		      STRESS_FLAG,
 		      Tri_Quad_Pt, 
 		      Tri_Quad_Wt,
 		      GAUSPT,
@@ -658,11 +668,11 @@ int main(int argc, char *argv[])
 		   T_ZERO,
 		   L_ZERO,
 		   Vel_Npe, 
-		   Pre_Npe, 
+		   Pre_Npe,
+		   Str_Npe, 
 		   Nem, 
 		   Vel_Nnm,
 		   N_TRI_QUAD,
-		   Pre_Nnm,
 		   Vel_Nod, 
 		   Pre_Nod, 
 		   Vel_Glxy, 
@@ -671,7 +681,7 @@ int main(int argc, char *argv[])
 		   Tri_Quad_Wt, 
 		   Ele_Neigh,
 		   VEL_FLAG, 
-		   PRE_FLAG, 
+		   STRESS_FLAG, 
 		   Soln_Cur_L.Values(),
 		   Soln_Cur_t.Values(),
 		   Bio_Soln_Cur_t.Values(),
@@ -791,7 +801,7 @@ int main(int argc, char *argv[])
 		  StrXYFilename,
 		  StrYYFilename,
 		  Str, 
-		  NX + 1);
+		  Str_Write_Size);
       
       File_No++;
       Bio_File_No++;
