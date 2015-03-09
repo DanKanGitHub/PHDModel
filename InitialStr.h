@@ -22,7 +22,7 @@ void InitialStr(int Nem,
 		double L_ZERO,
 		double T_ZERO,
 		E_ISDM Vel_Nod,
-		E_ISDM Pre_Nod,
+		E_ISDM Str_Nod,
 		E_SDM Glxy, 
 		double *Bio,
 		E_SDM & Str);

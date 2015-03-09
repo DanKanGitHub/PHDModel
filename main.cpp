@@ -80,7 +80,7 @@ const int MAX_TIME_STEP_NUM = 100;	// Maximum number of time interations
 
 const int VEL_FLAG = 2;			// Program flags 1 = linear, 2 = quadratic
 const int PRE_FLAG = 1;
-const int STRESS_FLAG = 2;
+const int STRESS_FLAG = 1;
 
 const int Write_Time_Steps_Skipped = 1;
 

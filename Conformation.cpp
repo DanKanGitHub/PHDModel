@@ -134,9 +134,10 @@ void Conformation(double TIMESTEP,
       El_Bio(i) = Bio[Vel_Inod];
     }
 
+    // The first element
     if(Ne == 0)
     {
-      for (int j = 0; j <= Str_Npe-1; j++)  // loop over element vertex nodes
+      for (int j = 0; j <= Str_Npe-1; j++)  // loop over all of the element nodes
       {
 	Vel_Inod = Vel_Nod(Ne,j) - 1;
 
@@ -374,11 +375,11 @@ void Conformation(double TIMESTEP,
       } // for j
     }
       
-    // minus 1 for C++ indexing Ele 2: Ne = 1 and is Ne associated with an odd numbered element
+    // minus 1 for C++ indexing Ele 2: Ne = 1 and is Ne associated with an odd numbered element on the first row.
     else if((Ne % 2 == 0) && (Ne <= 2 * NX - 2))
     {
       
-      for (int j = 1; j <= Str_Npe - 1; j++)  // loop over nodes 2 and 3 for the first row
+      for (int j = 1; j <= Str_Npe - 1; j++)  // loop over nodes 2 through Str_Npe for the first row
       {
 	Vel_Inod = Vel_Nod(Ne,j) - 1;
 

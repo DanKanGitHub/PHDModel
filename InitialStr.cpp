@@ -14,19 +14,13 @@ void InitialStr(int Nem,
 		double L_ZERO,
 		double T_ZERO,
 		E_ISDM Vel_Nod,
-		E_ISDM Pre_Nod,
+		E_ISDM Str_Nod,
 		E_SDM Glxy,
 		double *Bio,
 		E_SDM & Str) 
 {
   double y, Effective_Vis, Bio_Weight, RetardDivRelax, U_Zero, P_Zero, Effective_Den, Effective_Pol_Vis;
   int Bio_GP, Str_GP, Count;
-  
-//   for (int i = 0; i <= Nnm-1; i++)
-//   {
-//     y = Glxy(i,1);
-//     Str(i, 1) = NewVis * (3.0 - 6.0 * y);
-//   }
 
   U_Zero = L_ZERO / T_ZERO;
 
@@ -36,7 +30,7 @@ void InitialStr(int Nem,
     {
 
       Bio_GP = Vel_Nod(Ne, Np) - 1;
-      Str_GP = Pre_Nod(Ne, Np) - 1; // Global Point
+      Str_GP = Str_Nod(Ne, Np) - 1; // Global Point
       
 //       std::cout << "Str(Gp,1) = " << Str(Gp,1) << endl;
       
