@@ -28,9 +28,9 @@ void SparseAssembly(double Sol_Vis,
 		    int N_TRI_QUAD,
 		    int Vel_Nnm,
 		    int Pre_Nnm,
+		    int Str_Nnm,
 		    E_ISDM Vel_Nod,
 		    E_ISDM Pre_Nod,
-		    E_ISDM Str_Nod,
 		    E_ISDM Vel_Nod_BC_Hor,
 		    E_ISDM Vel_Nod_BC_Ver,
 		    E_ISDM Pre_Nod_BC, 
@@ -69,7 +69,6 @@ void SparseAssembly(double Sol_Vis,
   // Stress variables
   E_SDM El_Str; // Stress on a particular element
   E_SDV Gp_Str; // Stress at a particular Gauss point
-  int Str_Inod;
   
   //Bio
   E_SDV El_Bio;
@@ -87,8 +86,6 @@ void SparseAssembly(double Sol_Vis,
   double Temp_B1_Global, Temp_B2_Global; //, Temp_Shared;
   double Effective_Den, Effective_Vis, Rey_Num, Depart_Rey_Num; // Effective_Sol_Vis, Effective_Pol_Vis, 
   double P_Zero, U_Zero;
-  
-  int QWERTY;
   
   //Vel
   // There are, at most, 6 horizontal vel, 6 vertical vel and 3 pre components per row
@@ -156,20 +153,34 @@ void SparseAssembly(double Sol_Vis,
 
       for (int i = 0; i <= Pre_Npe-1; i++) 	// get global coordinates of local nodes of element Ne
       {
-	Pre_Inod = Pre_Nod(Ne,i) - 1;		// Global node number (minus one for indeXing) of local node.
+	Pre_Inod = Pre_Nod(Ne,i)-1;		// Global node number (minus one for indeXing) of local node.
 	Pre_Elxy(i,0) = Pre_Glxy(Pre_Inod,0);	// x-coordinate of the pressure
 	Pre_Elxy(i,1) = Pre_Glxy(Pre_Inod,1);	// y-coordinate
       }
-
-      for (int i = 0; i <= Str_Npe-1; i++) 	// get global coordinates of local nodes of element Ne
-      {
-	Str_Inod = Str_Nod(Ne,i) - 1;
-	El_Str(0,i) = Str(Str_Inod,0);
-	El_Str(1,i) = Str(Str_Inod,1);
-	El_Str(2,i) = Str(Str_Inod,1); // The Stress is symmetric
-	El_Str(3,i) = Str(Str_Inod,2);
-      }
       
+      if(STRESS_FLAG == 1)
+      {
+	for (int i = 0; i <= Str_Npe-1; i++) 	// get global coordinates of local nodes of element Ne
+	{
+	  Pre_Inod = Pre_Nod(Ne,i)-1;
+	  El_Str(0,i) = Str(Pre_Inod,0);
+	  El_Str(1,i) = Str(Pre_Inod,1);
+	  El_Str(2,i) = Str(Pre_Inod,1); // The Stress is symmetric
+	  El_Str(3,i) = Str(Pre_Inod,2);
+	}
+      }
+      else
+      {
+	for (int i = 0; i <= Str_Npe-1; i++) 	// get global coordinates of local nodes of element Ne
+	{
+	  Vel_Inod = Vel_Nod(Ne,i) - 1;
+	  El_Str(0,i) = Str(Vel_Inod,0);
+	  El_Str(1,i) = Str(Vel_Inod,1);
+	  El_Str(2,i) = Str(Vel_Inod,1); // The Stress is symmetric
+	  El_Str(3,i) = Str(Vel_Inod,2);
+	}
+      }
+
       for (int Ni = 0; Ni <= N_TRI_QUAD-1; Ni++) // loop over quadrature points
       {
 	Xi  = Tri_Quad_Pt(Ni,0);
@@ -390,8 +401,6 @@ void SparseAssembly(double Sol_Vis,
 	      {
 		std::cout << "Broke 2" << endl;
 		Error = 0;
-		
-		std::cin >> QWERTY;
 	      }
 
 	      if(Vel_Nod_BC_Hor(Ne,i) == 2) // This row is a natural BC
@@ -416,8 +425,6 @@ void SparseAssembly(double Sol_Vis,
 		{
 		  std::cout << "Broke 3" << endl;
 		  Error = 0;
-		  
-		  std::cin >> QWERTY;
 		}
 	      }
 
@@ -470,8 +477,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 4" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		} // if jj = 1
 
@@ -513,8 +518,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 5" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		} // if jj = 1
 	      } // vel j
@@ -555,8 +558,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 6" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		} // if kk
 	      } // pre k
@@ -568,8 +569,6 @@ void SparseAssembly(double Sol_Vis,
 	      {
 		std::cout << "Broke 7" << endl;
 		Error = 0;
-		
-		std::cin >> QWERTY;
 	      }
 	      
 	    } // if ii != 1
@@ -598,8 +597,6 @@ void SparseAssembly(double Sol_Vis,
 	      {
 		std::cout << "Broke 8" << endl;
 		Error = 0;
-		
-		std::cin >> QWERTY;
 	      }
 
 	      //The following is now done in InitMatZero.cpp
@@ -622,8 +619,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 9" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		}
 	      } // vel j
@@ -660,8 +655,6 @@ void SparseAssembly(double Sol_Vis,
 	      {
 		std::cout << "Broke 10" << endl;
 		Error = 0;
-		
-		std::cin >> QWERTY;
 	      }
 
 	      // VEL COLUMNS
@@ -710,8 +703,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 11" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		} // if jj = 1
 
@@ -755,8 +746,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 12" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		} // if jj = 1
 	      } // vel j
@@ -796,8 +785,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 13" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		} // if kk
 	      } // pre k
@@ -809,8 +796,6 @@ void SparseAssembly(double Sol_Vis,
 	      {
 		std::cout << "Broke 14" << endl;
 		Error = 0;
-		
-		std::cin >> QWERTY;
 	      }
 	    } // if ii != 1
 	    else // if(Vel_Nod_BC_Ver(Ne,i) == 1) // Essential BC on this row
@@ -836,8 +821,6 @@ void SparseAssembly(double Sol_Vis,
 	      {
 		std::cout << "Broke 15" << endl;
 		Error = 0;
-		
-		std::cin >> QWERTY;
 	      }
 
 	      for(int j = 0; j <= Vel_Npe-1; j++)
@@ -859,8 +842,6 @@ void SparseAssembly(double Sol_Vis,
 		  {
 		    std::cout << "Broke 16" << endl;
 		    Error = 0;
-		    
-		    std::cin >> QWERTY;
 		  }
 		}
 	      } // vel j
@@ -925,8 +906,6 @@ void SparseAssembly(double Sol_Vis,
 		{
 		  std::cout << "Broke 17" << endl;
 		  Error = 0;
-		  
-		  std::cin >> QWERTY;
 		}
 	      } // if jj
 
@@ -971,8 +950,6 @@ void SparseAssembly(double Sol_Vis,
 		{
 		  std::cout << "Broke 18" << endl;
 		  Error = 0;
-		  
-		  std::cin >> QWERTY;
 		}
 	      } // if jj
 	    } // for j
@@ -982,8 +959,6 @@ void SparseAssembly(double Sol_Vis,
 	    {
 	      std::cout << "Broke 19" << endl;
 	      Error = 0;
-	      
-	      std::cin >> QWERTY;
 	    }
 	  }// if kk is mine
 	} // pre k
