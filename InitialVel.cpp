@@ -7,10 +7,14 @@ void InitialVel(int Nnm,
 		E_SDM Glxy,
 		double *Vel) 
 {
-  double y;
+  double x, y;
+  
+  x = 0.0;
+  
   for (int i = 0; i <= Nnm-1; i++)
   {
     y = Glxy(i,1);
-    Vel[i] = -4.0 * y * (y - 1.0); // The max vel is 1 with a coeff of -4.
+    Vel[i] = HorizVel(x,
+		      y);
   }
 }

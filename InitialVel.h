@@ -4,6 +4,8 @@
 #ifndef InitialVel_H_Guard
 #define InitialVel_H_Guard
 
+#include "VelFunctions.h"
+
 #include "Epetra_SerialDenseMatrix.h"
 
 typedef Epetra_SerialDenseMatrix E_SDM;
