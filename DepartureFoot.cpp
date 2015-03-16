@@ -1,15 +1,7 @@
 // Departure Feet algorithm
+// global coordinates in and out (that is, not barycentric coordinates)
 
-#include "FeetSearch.h"
-#include "Shape2d.h"
 #include "DepartureFoot.h"
-#include "Epetra_SerialDenseMatrix.h"
-#include "Epetra_IntSerialDenseMatrix.h"
-#include "Epetra_SerialDenseVector.h"
-
-typedef Epetra_SerialDenseMatrix E_SDM;
-typedef Epetra_IntSerialDenseMatrix E_ISDM;
-typedef Epetra_SerialDenseVector E_SDV;
 
 void DepartureFoot(int Vel_Flag, 
 		   int Nem, 
@@ -197,10 +189,6 @@ void DepartureFoot(int Vel_Flag,
       // Do not enter the while loop if already converged
       while (Feet_Tol > TOL)// && counter <= 10) // converges in at most 5 steps
       {
-	
-// 	std::cout << "Departure Foot Counter = " << Count << endl;
-	
-// 	Count = Count + 1;
 
 	//Convert the new position to barycentric coordinates.
 	Y_New_Xi_Eta(0) = 1.0 / Two_Area * ((Y_New(0) - Vel_Elxy(2,0)) * (Vel_Elxy(1,1) - Vel_Elxy(2,1)) - 
