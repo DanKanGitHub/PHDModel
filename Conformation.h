@@ -4,16 +4,22 @@
 #ifndef Conformation_H_Guard
 #define Conformation_H_Guard
 
-#include "BioWeightFunc.h"
-#include "RetardationDividedByRelaxation.h"
+// #include <cmath>
+// #include "Shape2d.h"
+// #include "BioWeightFunc.h"
+// #include "RetardationDividedByRelaxation.h"
+#include "NodeStress.h"
+#include "DepartureFoot.h"
 
 #include "Epetra_SerialDenseMatrix.h"
 #include "Epetra_IntSerialDenseMatrix.h"
 #include "Epetra_SerialDenseVector.h"
+#include "Epetra_IntSerialDenseVector.h"
 
 typedef Epetra_SerialDenseMatrix E_SDM;
 typedef Epetra_IntSerialDenseMatrix E_ISDM;
 typedef Epetra_SerialDenseVector E_SDV;
+typedef Epetra_IntSerialDenseVector E_ISDV;
 
 void Conformation(double TIMESTEP, 
 		  double Sol_Vis,
@@ -29,13 +35,13 @@ void Conformation(double TIMESTEP,
 		  int Str_Npe, 
 		  int Nem, 
 		  int Vel_Nnm,
-		  int N_TRI_QUAD,
+		  int myid,
 		  E_ISDM Vel_Nod, 
 		  E_ISDM Pre_Nod, 
+		  E_ISDM Str_Nod,
 		  E_SDM Vel_Glxy, 
 		  E_SDM Pre_Glxy, 
-		  E_SDM Tri_Quad_Pt,
-		  E_SDV Tri_Quad_Wt, 
+		  E_SDM Str_Glxy,
 		  E_ISDM Ele_Neigh,
 		  int VEL_FLAG, 
 		  int STRESS_FLAG, 
@@ -44,6 +50,11 @@ void Conformation(double TIMESTEP,
 		  double *Bio,
 		  E_SDM Str, 
 		  E_SDM Str_Old,
+		  E_SDM StrNodeDepartFootx,
+		  E_SDM StrNodeDepartFooty,
+		  E_ISDM StrNodeDepartElement,
+		  E_ISDV All_Proc_Nodes,
+		  E_ISDV My_Proc_Eles,
 		  E_SDM & Str_New);
 
 #endif
