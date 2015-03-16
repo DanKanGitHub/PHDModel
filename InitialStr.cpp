@@ -31,14 +31,10 @@ void InitialStr(int Nem,
 
       Bio_GP = Vel_Nod(Ne, Np) - 1;
       Str_GP = Str_Nod(Ne, Np) - 1; // Global Point
-      
-//       std::cout << "Str(Gp,1) = " << Str(Gp,1) << endl;
-      
+
       if(Str(Str_GP,1) == 1000000)
       {
-	
-// 	std::cout << "Made it!" << endl;
-	
+
 	// Returns the bio-film volume fraction.
 	Bio_Weight = BioWeightFunc(Bio[Bio_GP]);
 
@@ -54,7 +50,7 @@ void InitialStr(int Nem,
 
 	y = Glxy(Str_GP,1);
 	
-	Str(Str_GP, 1) = Effective_Pol_Vis * (6.0 - 12.0 * y);
+	Str(Str_GP, 1) = Effective_Pol_Vis * PartialHorizVelPartialy(0.0, y);
 	
       }
       

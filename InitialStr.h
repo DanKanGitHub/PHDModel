@@ -6,6 +6,7 @@
 
 #include "BioWeightFunc.h"
 #include "RetardationDividedByRelaxation.h"
+#include "VelFunctions.h"
 
 #include "Epetra_SerialDenseMatrix.h"
 #include "Epetra_IntSerialDenseMatrix.h"
