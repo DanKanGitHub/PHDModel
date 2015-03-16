@@ -46,6 +46,9 @@
 #include "VectorDiffNorm.h"
 #include "VectorNorm.h"
 #include "InitialGuess.h"
+#include "GaussDepartureFeet.h"
+#include "StrNodeDepartureFeet.h"
+#include "StressReassemble.h"
 
 #include "Ifpack_ConfigDefs.h"
 #include "Ifpack_AdditiveSchwarz.h"
@@ -76,11 +79,11 @@ const int NX = 32;			// Number of element intervals in the horizontal direction
 const int NY = 32;
 const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
-const int MAX_TIME_STEP_NUM = 100;	// Maximum number of time interations
+const int MAX_TIME_STEP_NUM = 1000;	// Maximum number of time interations
 
 const int VEL_FLAG = 2;			// Program flags 1 = linear, 2 = quadratic
 const int PRE_FLAG = 1;
-const int STRESS_FLAG = 1;
+const int STRESS_FLAG = 2;
 
 const int Write_Time_Steps_Skipped = 1;
 
@@ -100,11 +103,13 @@ const double DENSITY_BIO = 1.0;	// Density Biofilm, kg/m^3 at 25 C.
 const double DENSITY_WATER = 1.0;	// Density Water, kg/m^3 at 25 C.
 const double T_ZERO = 60.0;		// seconds (I read Issac's paper for conformation.)
 const double L_ZERO = 0.01;		// meters
-const double TOL = 0.0000001;
+const double TOL = 0.000001;
+const double BIO_TOL = 0.0000001;
 const double DIFF_TOL = 0.000000000001;		// 10^(-12)
 const double EQUIB_TOL = 0.00001;		// The tolerance that determines if the pre-growth simulation has reached equilibrium
 const double DIFF_COEFF = 0.01; // 0.00001;	// This is a guess.  Diffusion coefffcient for eps diffusion into water
 const double BIO_DIFF_COEFF = 1.0;
+const double TIMESTEPSCALAR = 0.01;
 
 int main(int argc, char *argv[])
 {
@@ -145,8 +150,8 @@ int main(int argc, char *argv[])
   E_ISDM Bio_Nod_BC;
   
   // Other
-  E_SDM GAUSPT, GAUSWT, Tri_Quad_Pt;
-  E_ISDM Ele_Neigh;
+  E_SDM GAUSPT, GAUSWT, Tri_Quad_Pt, GaussDepartFootx, GaussDepartFooty, StrNodeDepartFootx, StrNodeDepartFooty;
+  E_ISDM Ele_Neigh, GaussDepartElement, StrNodeDepartElement;
   E_SDV Tri_Quad_Wt;
   int Nem, L, n, File_No, Diff_File_No, Bio_File_No;
   double dx, dy, Time_Step, SolnNorm, SolnDiffNorm, EquibTol;
@@ -157,7 +162,7 @@ int main(int argc, char *argv[])
   char StrXYFilename[100];
   char StrYYFilename[100];
   char BioFilename[100];
-  
+
   // Gaussian quadrature points and weights for 1d boundary integration, NGP = 1,2 3, or 4
   // In this code it is intended that NGP = 4
   GAUSPT.Shape(4,4);
@@ -193,11 +198,11 @@ int main(int argc, char *argv[])
   // element cannot move out of that element in a single time step
   if ( dx <= dy)
   {
-    Time_Step = dx / 100.0;
+    Time_Step = TIMESTEPSCALAR * dx;
   }
   else
   {
-    Time_Step = dy / 100.0;
+    Time_Step = TIMESTEPSCALAR * dy;
   }
 
   // preprocessor, generate mesh and connectivity matrix
@@ -242,6 +247,15 @@ int main(int argc, char *argv[])
 	     Str_Glxy, 
 	     Str_Nod);
 
+  GaussDepartFootx.Shape(Nem, N_TRI_QUAD);
+  GaussDepartFooty.Shape(Nem, N_TRI_QUAD);
+  GaussDepartElement.Shape(Nem, N_TRI_QUAD);
+  
+  StrNodeDepartFootx.Shape(Nem, Str_Npe);
+  StrNodeDepartFooty.Shape(Nem, Str_Npe);
+  StrNodeDepartElement.Shape(Nem, Str_Npe);
+  
+  // Assigns the correct row length for printing to files
   if(STRESS_FLAG == 1)
   {
     Str_Write_Size = NX + 1;
@@ -341,7 +355,7 @@ int main(int argc, char *argv[])
 	     Vel_Glxy,
 	     Bio_Soln_Cur_t.Values());
   
-  for(int i = 0; i < Pre_Nnm; i++)
+  for(int i = 0; i < Str_Nnm; i++)
   {
     Str(i,1) = 1000000;
   }
@@ -565,6 +579,55 @@ int main(int argc, char *argv[])
     Bio_Soln_Next_t = Bio_Soln_Cur_t;
     Str_Old = Str;
 
+    if(myid == 0)
+    {
+      std::cout << "Begin Departure Foot" << endl;
+    }
+    
+    GaussDepartureFeet(myid,
+		      Nem,
+		      N_TRI_QUAD,
+		      Vel_Npe,
+		      VEL_FLAG,
+		      Vel_Nnm,
+		      Time_Step,
+		      Vel_Glxy,
+		      Tri_Quad_Pt,
+		      Vel_Nod,
+		      Ele_Neigh,
+		      Proc_Node_Part.My_Proc_Eles,
+		      Soln_Cur_t.Values(),
+		      GaussDepartFootx,
+		      GaussDepartFooty,
+		      GaussDepartElement);
+    
+    if(myid == 0)
+    {
+      std::cout << "Begin Stress Departure Foot" << endl;
+    }
+    
+    StrNodeDepartureFeet(myid,
+			  Nem,
+			  Vel_Npe,
+			  Str_Npe,
+			  VEL_FLAG,
+			  Vel_Nnm,
+			  Time_Step,
+			  Vel_Glxy,
+			  Vel_Nod,
+			  Ele_Neigh,
+			  Proc_Node_Part.All_Proc_Nodes_VP,
+			  Proc_Node_Part.My_Proc_Eles,
+			  Soln_Cur_t.Values(),
+			  StrNodeDepartFootx,
+			  StrNodeDepartFooty,
+			  StrNodeDepartElement);
+    
+    if(myid == 0)
+    {
+      std::cout << "Finished Stress Departure Foot" << endl;
+    }
+    
     while (Tol > TOL) // && L <= 10)
     {
       
@@ -572,9 +635,23 @@ int main(int argc, char *argv[])
       b_VP.PutScalar(0.0);
       Soln_Next_L.PutScalar(0.0);
       
+      if(myid == 0)
+      {
+	std::cout << "Begin InitialGuess" << endl;
+      }
+      
       if((n == 0) & (L == 0))
       {
-	x_VP.PutScalar(0.0);
+	InitialGuess(Proc_Node_Part.All_Proc_Nodes_VP.Values(), 
+		    Vel_Npe,
+		    Vel_Nnm,
+		    Proc_Node_Part.My_Proc_Eles.Values(),
+		    Vel_Nod,
+		    Pre_Nod,
+		    Nem,
+		    myid,
+		    Soln_Cur_t.Values(), 
+		    x_VP);
       }
       else
       {
@@ -588,6 +665,11 @@ int main(int argc, char *argv[])
 		    myid,
 		    Soln_Cur_L.Values(), 
 		    x_VP);
+      }
+      
+      if(myid == 0)
+      {
+	std::cout << "Finished InitialGuess" << endl;
       }
       
       if(myid == 0)
@@ -620,8 +702,7 @@ int main(int argc, char *argv[])
 		      Vel_Nod_BC_Ver,
 		      Pre_Nod_BC,
 		      Vel_Glxy, 
-		      Pre_Glxy, 
-		      Ele_Neigh,
+		      Pre_Glxy,
 		      VEL_FLAG, 
 		      PRE_FLAG, 
 		      STRESS_FLAG,
@@ -635,6 +716,9 @@ int main(int argc, char *argv[])
 		      Proc_Node_Part.All_Proc_Nodes_VP,
 		      Proc_Node_Part.My_Proc_Eles,
 		      myid,
+		      GaussDepartFootx,
+		      GaussDepartFooty,
+		      GaussDepartElement,
 		      A_VP, 	// output
 		      b_VP);	// output
 
@@ -645,11 +729,10 @@ int main(int argc, char *argv[])
 
       Soln_Next_L.Import(x_VP,CompleteSolution_Importer_VP,Add);
 
-//       std::cout << "X_VP = " << x_VP << endl;
-//       
-//       int QWERTY;
-//       
-//       std::cin >> QWERTY;
+      if(myid == 0)
+      {
+	std::cout << "Vel, Pre Finished" << endl;
+      }
       
       Tol = VectorDiffNorm(Soln_Cur_L.Values(), 
 			Soln_Next_L.Values(), 
@@ -657,6 +740,11 @@ int main(int argc, char *argv[])
 
       Soln_Cur_L = Soln_Next_L;
 
+      if(myid == 0)
+      {
+	std::cout << "Str Begun" << endl;
+      }
+      
       // Determine the stress tensor.
       Conformation(Time_Step,
 		   SOL_NEW_VIS,
@@ -672,13 +760,13 @@ int main(int argc, char *argv[])
 		   Str_Npe, 
 		   Nem, 
 		   Vel_Nnm,
-		   N_TRI_QUAD,
+		   myid,
 		   Vel_Nod, 
 		   Pre_Nod, 
+		   Str_Nod,
 		   Vel_Glxy, 
 		   Pre_Glxy, 
-		   Tri_Quad_Pt, 
-		   Tri_Quad_Wt, 
+		   Str_Glxy,
 		   Ele_Neigh,
 		   VEL_FLAG, 
 		   STRESS_FLAG, 
@@ -687,11 +775,26 @@ int main(int argc, char *argv[])
 		   Bio_Soln_Cur_t.Values(),
 		   Str,
 		   Str_Old,
+		   StrNodeDepartFootx,
+		   StrNodeDepartFooty,
+		   StrNodeDepartElement,
+		   Proc_Node_Part.All_Proc_Nodes_VP,
+		   Proc_Node_Part.My_Proc_Eles,
 		   Str_New);	//output
 
       // Update the iteration variables
       Str = Str_New;
+//       StressReassemble(Str_Nnm,
+// 		       myid,
+// 		       Str_New, 
+// 		       Proc_Node_Part.All_Proc_Nodes_VP, 
+// 		       Str);
 
+      if(myid == 0)
+      {
+	std::cout << "Str Finished" << endl;
+      }
+      
       // Iterate counter
       L++;
 
@@ -734,12 +837,22 @@ int main(int argc, char *argv[])
 
     Prec_Bio->Compute();
     
-    Solver_Bio.Iterate(1000, TOL);
+    Solver_Bio.Iterate(1000, BIO_TOL);
     
     Bio_Soln_Next_t.Import(x_Bio,CompleteSolution_Importer_Bio,Add);
     
     Bio_Soln_Cur_t = Bio_Soln_Next_t;
 
+    if(myid == 0)
+    {
+      std::cout << "Bio Finished" << endl;
+    }
+    
+    if(myid == 0)
+    {
+      std::cout << "Begin Writing to file" << endl;
+    }
+    
     //If the timestep n just computed is to be printed to the data files
     if((n % Write_Time_Steps_Skipped) == 0)
     {
@@ -805,6 +918,11 @@ int main(int argc, char *argv[])
       
       File_No++;
       Bio_File_No++;
+    }
+    
+    if(myid == 0)
+    {
+      std::cout << "Finished Writing to file" << endl;
     }
     
 //     A_VP.PutScalar(0.0);
