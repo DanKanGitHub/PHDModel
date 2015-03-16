@@ -11,8 +11,9 @@
 #ifndef SparseAssembly_H_Guard
 #define SparseAssembly_H_Guard
 
+#include <cmath>
+
 #include "Shape2d.h"
-#include "DepartureFoot.h"
 #include "VelEssenBoundary2d.h"
 #include "PreEssenBoundary2d.h"
 #include "NatBoundary2d.h"
@@ -60,8 +61,7 @@ void SparseAssembly(double Sol_Vis,
 		    E_ISDM Vel_Nod_BC_Ver,
 		    E_ISDM Pre_Nod_BC, 
 		    E_SDM Vel_Glxy, 
-		    E_SDM Pre_Glxy, 
-		    E_ISDM Ele_Neigh,
+		    E_SDM Pre_Glxy,
 		    int VEL_FLAG,
 		    int PRE_FLAG, 
 		    int STRESS_FLAG,
@@ -74,8 +74,10 @@ void SparseAssembly(double Sol_Vis,
 		    double *Vel_Old,
 		    E_ISDV All_Proc_Nodes_VP,
 		    E_ISDV My_Proc_Eles,
-// 		    E_SDV Shared_Nodes_VP,
 		    int myid,
+		    E_SDM GaussDepartFootx,
+		    E_SDM GaussDepartFooty,
+		    E_ISDM GaussDepartElement,
 		    E_CM & A, 
 		    E_V & b);
 #endif

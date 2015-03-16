@@ -35,8 +35,7 @@ void SparseAssembly(double Sol_Vis,
 		    E_ISDM Vel_Nod_BC_Ver,
 		    E_ISDM Pre_Nod_BC, 
 		    E_SDM Vel_Glxy, 
-		    E_SDM Pre_Glxy, 
-		    E_ISDM Ele_Neigh,
+		    E_SDM Pre_Glxy,
 		    int VEL_FLAG,
 		    int PRE_FLAG, 
 		    int STRESS_FLAG,
@@ -50,6 +49,9 @@ void SparseAssembly(double Sol_Vis,
 		    E_ISDV All_Proc_Nodes_VP,
 		    E_ISDV My_Proc_Eles,
 		    int myid,
+		    E_SDM GaussDepartFootx,
+		    E_SDM GaussDepartFooty,
+		    E_ISDM GaussDepartElement,
 		    E_CM & A, 
 		    E_V & b) {
   
@@ -77,11 +79,10 @@ void SparseAssembly(double Sol_Vis,
   
   // Other variables
   E_SDM Dep_Gdsf;
-  E_SDV Ini_Foot, Depart_Foot, Y_New_Xi_Eta, Dep_Sf;
+  E_SDV Dep_Sf;
   int ii, jj, kk, New_Ele, Inod, IndexCounter, Error;//, Gauss_Pt_Num, Cur_Ele;
   double Xi, Eta, Depart_a00, a00, a11, a22, DetJ, Const;
-  double alpha1, alpha2, alpha3, Two_Area;
-  double a1, a2, b1, b2, c1, c2, x_Foot, y_Foot, x, y;
+  double x, y;
   double Temp_A11_Global, Temp_A12_Global, Temp_A21_Global, Temp_A22_Global;
   double Temp_B1_Global, Temp_B2_Global; //, Temp_Shared;
   double Effective_Den, Effective_Vis, Rey_Num, Depart_Rey_Num; // Effective_Sol_Vis, Effective_Pol_Vis, 
@@ -92,8 +93,7 @@ void SparseAssembly(double Sol_Vis,
   double *Values1 = new double[15];
   double *Values2 = new double[15]; // We fill two rows at a time
   int *Indices = new int[15];
-  // int *Indices2 = new int[15];
-  
+
   Essen_Vel.Size(2);
   Nat_Vel.Size(2);
   
@@ -109,10 +109,7 @@ void SparseAssembly(double Sol_Vis,
   El_Vel.Shape(2,Vel_Npe);
   El_Bio.Size(Vel_Npe);
   It_Vel.Size(2);
-  Ini_Foot.Size(2);
-  Depart_Foot.Size(2);
   Depart_Vel.Size(2);
-  Y_New_Xi_Eta.Size(2);
 
   // Initialize
   // Velocity terms
@@ -233,82 +230,22 @@ void SparseAssembly(double Sol_Vis,
 	  }
 	}
 
-	// Convert the gauss point into cartesian coordinates for the associated element.
-	// In general: 2 * Area = x2 * y3 - x3 * y2 + x3 * y1 - x1 * y3 + x1 * y2 - x2 * y1
-	alpha1 = Vel_Elxy(1,0) * Vel_Elxy(2,1) - Vel_Elxy(2,0) * Vel_Elxy(1,1); // x2 * y3 - x3 * y2
-	alpha2 = Vel_Elxy(2,0) * Vel_Elxy(0,1) - Vel_Elxy(0,0) * Vel_Elxy(2,1); // x3 * y1 - x1 * y3
-	alpha3 = Vel_Elxy(0,0) * Vel_Elxy(1,1) - Vel_Elxy(1,0) * Vel_Elxy(0,1); // x1 * y2 - x2 * y1
+	New_Ele = GaussDepartElement(Ne, Ni);
 	
-	Two_Area = alpha1 + alpha2 + alpha3;
-      
-	a1 = Two_Area * Xi + Vel_Elxy(2,0) * (Vel_Elxy(1,1) - Vel_Elxy(2,1)) - Vel_Elxy(2,1) * (Vel_Elxy(1,0) - Vel_Elxy(2,0));
-
-	b1 = Vel_Elxy(1,1) - Vel_Elxy(2,1);
-      
-	c1 = Vel_Elxy(2,0) - Vel_Elxy(1,0);
-      
-	a2 = Two_Area * Eta + Vel_Elxy(0,0) * (Vel_Elxy(2,1) - Vel_Elxy(0,1)) + Vel_Elxy(0,1) * (Vel_Elxy(0,0) - Vel_Elxy(2,0));
-      
-	b2 = Vel_Elxy(2,1) - Vel_Elxy(0,1);
-      
-	c2 = Vel_Elxy(0,0) - Vel_Elxy(2,0);
-      
-	// These are the global coordinates of the gauss point and are constant throughout this loop
-	x_Foot = 1.0 / (b1 * c2 - c1 * b2) * (c2 * a1 - c1 * a2);
-      
-	y_Foot = 1.0 / (b1 * c2 - c1 * b2) * (b1 * a2 - b2 * a1);
-	
-	Ini_Foot(0) = x_Foot;
-	Ini_Foot(1) = y_Foot;
-
-	DepartureFoot(VEL_FLAG, 
-		      Ne, 
-		      Vel_Nnm,
-		      TIMESTEP,
-		      Vel_Old, 
-		      Vel_Glxy, 
-		      Vel_Npe, 
-		      Vel_Nod, 
-		      Ele_Neigh,
-		      Ini_Foot,		// in x,y space
-		      Depart_Foot,	// output in x,y space
-		      New_Ele);		// output
-
-	// Determine the element the Gauss point has moved into
-	if(New_Ele-1 != Ne)
+	for (int k = 0; k <= Vel_Npe-1; k++) // get global coordinates of local nodes of element NE
 	{
-	  for (int k = 0; k <= Vel_Npe-1; k++) // get global coordinates of local nodes of element NE
-	  {
-	    Inod = Vel_Nod(New_Ele-1,k) - 1;		// Global node number of local node.
-	    Vel_Elxy(k,0) = Vel_Glxy(Inod,0);	// x-coordinate of te new element
-	    Vel_Elxy(k,1) = Vel_Glxy(Inod,1);	// y-coordinate of the new element
-      
-	    El_Vel(0,k) = Vel_Old[Inod];
-	    El_Vel(1,k) = Vel_Old[Inod + Vel_Nnm];
-	    
-	    El_Bio(k) = Bio[Inod];
-	  }
+	  Inod = Vel_Nod(New_Ele-1,k) - 1;		// Global node number of local node.
+	  Vel_Elxy(k,0) = Vel_Glxy(Inod,0);	// x-coordinate of te new element
+	  Vel_Elxy(k,1) = Vel_Glxy(Inod,1);	// y-coordinate of the new element
+    
+	  El_Vel(0,k) = Vel_Old[Inod];
+	  El_Vel(1,k) = Vel_Old[Inod + Vel_Nnm];
+	  
+	  El_Bio(k) = Bio[Inod];
 	}
-
-	// Convert the cartesian coordinates to barycentric coordinates
-	alpha1 = Vel_Elxy(1,0) * Vel_Elxy(2,1) - Vel_Elxy(2,0) * Vel_Elxy(1,1); // x2 * y3 - x3 * y2
-	alpha2 = Vel_Elxy(2,0) * Vel_Elxy(0,1) - Vel_Elxy(0,0) * Vel_Elxy(2,1); // x3 * y1 - x1 * y3
-	alpha3 = Vel_Elxy(0,0) * Vel_Elxy(1,1) - Vel_Elxy(1,0) * Vel_Elxy(0,1); // x1 * y2 - x2 * y1
 	
-	Two_Area = alpha1 + alpha2 + alpha3;
-	
-	Y_New_Xi_Eta(0) = 1.0 / Two_Area * ((Depart_Foot(0) - Vel_Elxy(2,0)) * (Vel_Elxy(1,1) - Vel_Elxy(2,1)) - 
-			  (Depart_Foot(1) - Vel_Elxy(2,1)) * (Vel_Elxy(1,0) - Vel_Elxy(2,0)));
-	
-	Y_New_Xi_Eta(1) = 1.0 / Two_Area * ((Depart_Foot(0) - Vel_Elxy(0,0)) * (Vel_Elxy(2,1) - Vel_Elxy(0,1)) + 
-			  (Depart_Foot(1) - Vel_Elxy(0,1)) * (Vel_Elxy(0,0) - Vel_Elxy(2,0)));
-
-	//The point may have not left the element but it did move so recompute everything at the new position
-	Xi = Y_New_Xi_Eta(0);
-	Eta = Y_New_Xi_Eta(1);
-
-	Shape2d(Xi, 
-		Eta, 
+	Shape2d(GaussDepartFootx(Ne, Ni), 
+		GaussDepartFooty(Ne, Ni), 
 		Vel_Elxy, 
 		Vel_Npe, 
 		VEL_FLAG, 
