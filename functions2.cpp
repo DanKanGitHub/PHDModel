@@ -19,7 +19,7 @@ void EssenEntrance(double x,
 		   double y,
 		   E_SDV & z)
 {
-  z(0) = -6.0 * y * (y - 1.0);
+  z(0) = -4.0 * y * (y - 1.0); // Coeff if 
   z(1) = 0.0;
 }
 
