@@ -7,7 +7,8 @@ LINKS = ${Trilinos_LIBRARY_DIRS} ${Trilinos_TPL_LIBRARY_DIRS} ${Trilinos_LIBRARI
 fem2d: main.o VelBioMesh2d.o PreMesh2d.o SparseAssembly.o EquibSparseAssembly.o QuadPtWt.o InitialVel.o InitialStr.o ElementNeigh.o Conformation.o \
 	DepartureFoot.o Shape2d.o FeetSearch.o functions2.o NatBoundary2d.o PreEssenBoundary2d.o VelEssenBoundary2d.o InitMatZero.o InitialBio.o \
 	InitMatZeroBio.o BioSparseAssembly.o BioDiffSparseAssembly.o ProcNodePartitionClass.o BioWeightFunc.o RetardationDividedByRelaxation.o \
-	PolymericViscosityFunctionofBioVolFrac.o WriteVelPreData.o WriteBioData.o WriteStrData.o VectorNorm.o VectorDiffNorm.o InitialGuess.o StrMesh2d.o
+	PolymericViscosityFunctionofBioVolFrac.o WriteVelPreData.o WriteBioData.o WriteStrData.o VectorNorm.o VectorDiffNorm.o InitialGuess.o StrMesh2d.o \
+	VelFunctions.o GaussDepartureFeet.o StrNodeDepartureFeet.o NodeStress.o StressReassemble.o
 	${CC} -o $@ $^  $(LINKS)
 
 main.o: main.cpp
@@ -22,7 +23,7 @@ PreMesh2d.o: PreMesh2d.cpp PreMesh2d.h
 StrMesh2d.o: StrMesh2d.cpp StrMesh2d.h
 	${CC} StrMesh2d.cpp -c ${CFLAGS}
 
-SparseAssembly.o: SparseAssembly.cpp SparseAssembly.h Shape2d.h DepartureFoot.h NatBoundary2d.h PreEssenBoundary2d.h VelEssenBoundary2d.h BioWeightFunc.h RetardationDividedByRelaxation.h
+SparseAssembly.o: SparseAssembly.cpp SparseAssembly.h Shape2d.h NatBoundary2d.h PreEssenBoundary2d.h VelEssenBoundary2d.h BioWeightFunc.h RetardationDividedByRelaxation.h
 	${CC} SparseAssembly.cpp -c ${CFLAGS}
 
 EquibSparseAssembly.o: EquibSparseAssembly.cpp EquibSparseAssembly.h Shape2d.h NatBoundary2d.h PreEssenBoundary2d.h VelEssenBoundary2d.h BioWeightFunc.h RetardationDividedByRelaxation.h
@@ -49,8 +50,11 @@ InitialStr.o: InitialStr.cpp InitialStr.h BioWeightFunc.h RetardationDividedByRe
 ElementNeigh.o: ElementNeigh.cpp ElementNeigh.h
 	${CC} ElementNeigh.cpp -c ${CFLAGS}
 
-Conformation.o: Conformation.cpp Conformation.h Shape2d.h DepartureFoot.h
+Conformation.o: Conformation.cpp Conformation.h NodeStress.h DepartureFoot.h
 	${CC} Conformation.cpp -c ${CFLAGS}
+
+NodeStress.o: NodeStress.cpp NodeStress.h Shape2d.h RetardationDividedByRelaxation.h BioWeightFunc.h
+	${CC} NodeStress.cpp -c ${CFLAGS}
 
 Shape2d.o: Shape2d.cpp Shape2d.h
 	${CC} Shape2d.cpp -c ${CFLAGS}
@@ -108,6 +112,19 @@ VectorNorm.o: VectorNorm.cpp VectorNorm.h
 
 InitialGuess.o: InitialGuess.cpp InitialGuess.h
 	${CC} InitialGuess.cpp -c ${CFLAGS}
+
+
+VelFunctions.o: VelFunctions.cpp VelFunctions.h
+	${CC} VelFunctions.cpp -c ${CFLAGS}
+
+GaussDepartureFeet.o: GaussDepartureFeet.cpp GaussDepartureFeet.h DepartureFoot.h
+	${CC} GaussDepartureFeet.cpp -c ${CFLAGS}
+
+StrNodeDepartureFeet.o: StrNodeDepartureFeet.cpp StrNodeDepartureFeet.h DepartureFoot.h
+	${CC} StrNodeDepartureFeet.cpp -c ${CFLAGS}
+
+StressReassemble.o: StressReassemble.cpp StressReassemble.h
+	${CC} StressReassemble.cpp -c ${CFLAGS}
 
 clean:
 	rm -rf *.o
