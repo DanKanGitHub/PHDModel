@@ -507,13 +507,13 @@ void Conformation(double TIMESTEP,
 
 // 	Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; // Ne + 1; //
 	Cur_Ele = New_Ele;
-	if(New_Ele != StrNodeDepartElement(Ne,j))
-	{
-	  std::cout << "Elements not equal" << endl;
-	  std::cout << "New_Ele = " << New_Ele << endl;
-	  std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
-	  std::cout << "Ne = " << Ne << endl;
-	}
+// 	if(New_Ele != StrNodeDepartElement(Ne,j))
+// 	{
+// 	  std::cout << "Elements not equal" << endl;
+// 	  std::cout << "New_Ele = " << New_Ele << endl;
+// 	  std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
+// 	  std::cout << "Ne = " << Ne << endl;
+// 	}
 	
 	// Compute the stress at the departure foot
 	for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
@@ -544,19 +544,19 @@ void Conformation(double TIMESTEP,
 // 	Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
 // 	Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
 	
-	if(Xi != StrNodeDepartFootx(Ne, j))
-	{
-	  std::cout << "X-value not equal" << endl;
-	  std::cout << "Xi = " << Xi << endl;
-	  std::cout << "StrNodeDepartFootx = " << StrNodeDepartFootx(Ne, j) << endl;
-	}
-	
-	if(Eta != StrNodeDepartFooty(Ne, j))
-	{
-	  std::cout << "Y-value not equal" << endl;
-	  std::cout << "Eta = " << Eta << endl;
-	  std::cout << "StrNodeDepartFooty = " << StrNodeDepartFooty(Ne, j) << endl;
-	}
+// 	if(Xi != StrNodeDepartFootx(Ne, j))
+// 	{
+// 	  std::cout << "X-value not equal" << endl;
+// 	  std::cout << "Xi = " << Xi << endl;
+// 	  std::cout << "StrNodeDepartFootx = " << StrNodeDepartFootx(Ne, j) << endl;
+// 	}
+// 	
+// 	if(Eta != StrNodeDepartFooty(Ne, j))
+// 	{
+// 	  std::cout << "Y-value not equal" << endl;
+// 	  std::cout << "Eta = " << Eta << endl;
+// 	  std::cout << "StrNodeDepartFooty = " << StrNodeDepartFooty(Ne, j) << endl;
+// 	}
 
 	Shape2d(Xi, 
 		Eta, 
@@ -743,13 +743,13 @@ void Conformation(double TIMESTEP,
 
 // 	Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
 	Cur_Ele = New_Ele;
-	if(New_Ele != StrNodeDepartElement(Ne,j))
-	{
-	  std::cout << "Elements not equal" << endl;
-	  std::cout << "New_Ele = " << New_Ele << endl;
-	  std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
-	  std::cout << "Ne = " << Ne << endl;
-	}
+// 	if(New_Ele != StrNodeDepartElement(Ne,j))
+// 	{
+// 	  std::cout << "Elements not equal" << endl;
+// 	  std::cout << "New_Ele = " << New_Ele << endl;
+// 	  std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
+// 	  std::cout << "Ne = " << Ne << endl;
+// 	}
 	
 	// Compute the stress at the departure foot
 	for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
@@ -977,13 +977,13 @@ void Conformation(double TIMESTEP,
 
 //       Cur_Ele = StrNodeDepartElement(Ne, JJ); // New_Ele; //Ne + 1;
       Cur_Ele = New_Ele;
-      if(New_Ele != StrNodeDepartElement(Ne,JJ))
-      {
-	std::cout << "Elements not equal" << endl;
-	std::cout << "New_Ele = " << New_Ele << endl;
-	std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,JJ) << endl;
-	std::cout << "Ne = " << Ne << endl;
-      }
+//       if(New_Ele != StrNodeDepartElement(Ne,JJ))
+//       {
+// 	std::cout << "Elements not equal" << endl;
+// 	std::cout << "New_Ele = " << New_Ele << endl;
+// 	std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,JJ) << endl;
+// 	std::cout << "Ne = " << Ne << endl;
+//       }
       
       // Compute the stress at the departure foot
       for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
@@ -1207,13 +1207,13 @@ void Conformation(double TIMESTEP,
 // 	  Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
 	  Cur_Ele = New_Ele;
 	  
-	  if(New_Ele != StrNodeDepartElement(Ne,j))
-	  {
-	    std::cout << "Elements not equal" << endl;
-	    std::cout << "New_Ele = " << New_Ele << endl;
-	    std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
-	    std::cout << "Ne = " << Ne << endl;
-	  }
+// 	  if(New_Ele != StrNodeDepartElement(Ne,j))
+// 	  {
+// 	    std::cout << "Elements not equal" << endl;
+// 	    std::cout << "New_Ele = " << New_Ele << endl;
+// 	    std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
+// 	    std::cout << "Ne = " << Ne << endl;
+// 	  }
 	  
 	  // Compute the stress at the departure foot
 	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
@@ -1431,13 +1431,13 @@ void Conformation(double TIMESTEP,
 //       Cur_Ele = StrNodeDepartElement(Ne,JJ); // New_Ele; //Ne + 1;
       Cur_Ele = New_Ele;
       
-      if(New_Ele != StrNodeDepartElement(Ne,JJ))
-      {
-	std::cout << "Elements not equal" << endl;
-	std::cout << "New_Ele = " << New_Ele << endl;
-	std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,JJ) << endl;
-	std::cout << "Ne = " << Ne << endl;
-      }
+//       if(New_Ele != StrNodeDepartElement(Ne,JJ))
+//       {
+// 	std::cout << "Elements not equal" << endl;
+// 	std::cout << "New_Ele = " << New_Ele << endl;
+// 	std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,JJ) << endl;
+// 	std::cout << "Ne = " << Ne << endl;
+//       }
       
       // Compute the stress at the departure foot
       for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE

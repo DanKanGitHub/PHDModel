@@ -106,6 +106,7 @@ const double L_ZERO = 0.01;		// meters
 const double TOL = 0.000001;
 const double BIO_TOL = 0.0000001;
 const double DIFF_TOL = 0.000000000001;		// 10^(-12)
+// Hits 0.0000001 for 64X64!
 const double EQUIB_TOL = 0.00001;		// The tolerance that determines if the pre-growth simulation has reached equilibrium
 const double DIFF_COEFF = 0.01; // 0.00001;	// This is a guess.  Diffusion coefffcient for eps diffusion into water
 const double BIO_DIFF_COEFF = 1.0;
@@ -612,6 +613,8 @@ int main(int argc, char *argv[])
 			  Str_Npe,
 			  VEL_FLAG,
 			  Vel_Nnm,
+			  NX,
+			  STRESS_FLAG,
 			  Time_Step,
 			  Vel_Glxy,
 			  Vel_Nod,
