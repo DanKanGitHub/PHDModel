@@ -489,32 +489,8 @@ void Conformation(double TIMESTEP,
 		Vel_Gdsf, 
 		DetJ);
 
-	Ini_Foot(0) = x;
-	Ini_Foot(1) = y;
+	Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; // Ne + 1; //
 
-	DepartureFoot(VEL_FLAG, 
-			Ne, 
-			Vel_Nnm,
-			TIMESTEP,
-			Vel_Old, 
-			Vel_Glxy, 
-			Vel_Npe, 
-			Vel_Nod, 
-			Ele_Neigh,
-			Ini_Foot,
-			Depart_Foot,	// output
-			New_Ele);	// output
-
-// 	Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; // Ne + 1; //
-	Cur_Ele = New_Ele;
-// 	if(New_Ele != StrNodeDepartElement(Ne,j))
-// 	{
-// 	  std::cout << "Elements not equal" << endl;
-// 	  std::cout << "New_Ele = " << New_Ele << endl;
-// 	  std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
-// 	  std::cout << "Ne = " << Ne << endl;
-// 	}
-	
 	// Compute the stress at the departure foot
 	for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
 	{
@@ -528,35 +504,9 @@ void Conformation(double TIMESTEP,
 	  El_Str(3,i) = Str_Old(Inod,2);
 	}
 
-	alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
-	alpha2 = Str_Elxy(2,0) * Str_Elxy(0,1) - Str_Elxy(0,0) * Str_Elxy(2,1); // x3 * y1 - x1 * y3
-	alpha3 = Str_Elxy(0,0) * Str_Elxy(1,1) - Str_Elxy(1,0) * Str_Elxy(0,1); // x1 * y2 - x2 * y1
-	
-	Two_Area = alpha1 + alpha2 + alpha3;
-	
-	Xi = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(2,0)) * (Str_Elxy(1,1) - Str_Elxy(2,1)) - 
-			  (Depart_Foot(1) - Str_Elxy(2,1)) * (Str_Elxy(1,0) - Str_Elxy(2,0)));
-	
-	Eta = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(0,0)) * (Str_Elxy(2,1) - Str_Elxy(0,1)) + 
-			  (Depart_Foot(1) - Str_Elxy(0,1)) * (Str_Elxy(0,0) - Str_Elxy(2,0)));
-	
 // 	The point may have not left the element but it did move so recompute everything at the new position
-// 	Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
-// 	Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
-	
-// 	if(Xi != StrNodeDepartFootx(Ne, j))
-// 	{
-// 	  std::cout << "X-value not equal" << endl;
-// 	  std::cout << "Xi = " << Xi << endl;
-// 	  std::cout << "StrNodeDepartFootx = " << StrNodeDepartFootx(Ne, j) << endl;
-// 	}
-// 	
-// 	if(Eta != StrNodeDepartFooty(Ne, j))
-// 	{
-// 	  std::cout << "Y-value not equal" << endl;
-// 	  std::cout << "Eta = " << Eta << endl;
-// 	  std::cout << "StrNodeDepartFooty = " << StrNodeDepartFooty(Ne, j) << endl;
-// 	}
+	Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
+	Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
 
 	Shape2d(Xi, 
 		Eta, 
@@ -725,32 +675,8 @@ void Conformation(double TIMESTEP,
 		Vel_Gdsf, 
 		DetJ);
 
-	Ini_Foot(0) = x;
-	Ini_Foot(1) = y;
+	Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
 
-	DepartureFoot(VEL_FLAG, 
-			Ne, 
-			Vel_Nnm,
-			TIMESTEP,
-			Vel_Old, 
-			Vel_Glxy, 
-			Vel_Npe, 
-			Vel_Nod, 
-			Ele_Neigh,
-			Ini_Foot,
-			Depart_Foot,	// output
-			New_Ele);		// output
-
-// 	Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
-	Cur_Ele = New_Ele;
-// 	if(New_Ele != StrNodeDepartElement(Ne,j))
-// 	{
-// 	  std::cout << "Elements not equal" << endl;
-// 	  std::cout << "New_Ele = " << New_Ele << endl;
-// 	  std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
-// 	  std::cout << "Ne = " << Ne << endl;
-// 	}
-	
 	// Compute the stress at the departure foot
 	for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
 	{
@@ -763,22 +689,10 @@ void Conformation(double TIMESTEP,
 	  El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
 	  El_Str(3,i) = Str_Old(Inod,2);
 	}
-	
-	alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
-	alpha2 = Str_Elxy(2,0) * Str_Elxy(0,1) - Str_Elxy(0,0) * Str_Elxy(2,1); // x3 * y1 - x1 * y3
-	alpha3 = Str_Elxy(0,0) * Str_Elxy(1,1) - Str_Elxy(1,0) * Str_Elxy(0,1); // x1 * y2 - x2 * y1
-	
-	Two_Area = alpha1 + alpha2 + alpha3;
-	
-	Xi = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(2,0)) * (Str_Elxy(1,1) - Str_Elxy(2,1)) - 
-			  (Depart_Foot(1) - Str_Elxy(2,1)) * (Str_Elxy(1,0) - Str_Elxy(2,0)));
-	
-	Eta = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(0,0)) * (Str_Elxy(2,1) - Str_Elxy(0,1)) + 
-			  (Depart_Foot(1) - Str_Elxy(0,1)) * (Str_Elxy(0,0) - Str_Elxy(2,0)));
-	
+
 // 	The point may have not left the element but it did move so recompute everything at the new position
-// 	Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
-// 	Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
+	Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
+	Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
 
 	Shape2d(Xi, 
 		Eta, 
@@ -959,32 +873,8 @@ void Conformation(double TIMESTEP,
 	      Vel_Gdsf, 
 	      DetJ);
 
-      Ini_Foot(0) = x;
-      Ini_Foot(1) = y;
+      Cur_Ele = StrNodeDepartElement(Ne, JJ); // New_Ele; //Ne + 1;
 
-      DepartureFoot(VEL_FLAG, 
-		      Ne, 
-		      Vel_Nnm,
-		      TIMESTEP,
-		      Vel_Old, 
-		      Vel_Glxy, 
-		      Vel_Npe, 
-		      Vel_Nod, 
-		      Ele_Neigh,
-		      Ini_Foot,
-		      Depart_Foot,	// output
-		      New_Ele);		// output
-
-//       Cur_Ele = StrNodeDepartElement(Ne, JJ); // New_Ele; //Ne + 1;
-      Cur_Ele = New_Ele;
-//       if(New_Ele != StrNodeDepartElement(Ne,JJ))
-//       {
-// 	std::cout << "Elements not equal" << endl;
-// 	std::cout << "New_Ele = " << New_Ele << endl;
-// 	std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,JJ) << endl;
-// 	std::cout << "Ne = " << Ne << endl;
-//       }
-      
       // Compute the stress at the departure foot
       for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
       {
@@ -997,22 +887,10 @@ void Conformation(double TIMESTEP,
 	El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
 	El_Str(3,i) = Str_Old(Inod,2);
       }
-      
-      alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
-      alpha2 = Str_Elxy(2,0) * Str_Elxy(0,1) - Str_Elxy(0,0) * Str_Elxy(2,1); // x3 * y1 - x1 * y3
-      alpha3 = Str_Elxy(0,0) * Str_Elxy(1,1) - Str_Elxy(1,0) * Str_Elxy(0,1); // x1 * y2 - x2 * y1
-      
-      Two_Area = alpha1 + alpha2 + alpha3;
-      
-      Xi = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(2,0)) * (Str_Elxy(1,1) - Str_Elxy(2,1)) - 
-			(Depart_Foot(1) - Str_Elxy(2,1)) * (Str_Elxy(1,0) - Str_Elxy(2,0)));
-      
-      Eta = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(0,0)) * (Str_Elxy(2,1) - Str_Elxy(0,1)) + 
-			(Depart_Foot(1) - Str_Elxy(0,1)) * (Str_Elxy(0,0) - Str_Elxy(2,0)));
-      
+
 //       The point may have not left the element but it did move so recompute everything at the new position
-//       Xi = StrNodeDepartFootx(Ne, JJ); // Y_New_Xi_Eta(0); //
-//       Eta = StrNodeDepartFooty(Ne, JJ); // Y_New_Xi_Eta(1); //
+      Xi = StrNodeDepartFootx(Ne, JJ); // Y_New_Xi_Eta(0); //
+      Eta = StrNodeDepartFooty(Ne, JJ); // Y_New_Xi_Eta(1); //
 
       Shape2d(Xi, 
 	      Eta, 
@@ -1188,33 +1066,8 @@ void Conformation(double TIMESTEP,
 		  Vel_Gdsf, 
 		  DetJ);
 
-	  Ini_Foot(0) = x;
-	  Ini_Foot(1) = y;
+	  Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
 
-	  DepartureFoot(VEL_FLAG, 
-			  Ne, 
-			  Vel_Nnm,
-			  TIMESTEP,
-			  Vel_Old, 
-			  Vel_Glxy, 
-			  Vel_Npe, 
-			  Vel_Nod, 
-			  Ele_Neigh,
-			  Ini_Foot,
-			  Depart_Foot,	// output
-			  New_Ele);		// output
-
-// 	  Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
-	  Cur_Ele = New_Ele;
-	  
-// 	  if(New_Ele != StrNodeDepartElement(Ne,j))
-// 	  {
-// 	    std::cout << "Elements not equal" << endl;
-// 	    std::cout << "New_Ele = " << New_Ele << endl;
-// 	    std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,j) << endl;
-// 	    std::cout << "Ne = " << Ne << endl;
-// 	  }
-	  
 	  // Compute the stress at the departure foot
 	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
 	  {
@@ -1228,21 +1081,9 @@ void Conformation(double TIMESTEP,
 	    El_Str(3,i) = Str_Old(Inod,2);
 	  }
 
-	  alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
-	  alpha2 = Str_Elxy(2,0) * Str_Elxy(0,1) - Str_Elxy(0,0) * Str_Elxy(2,1); // x3 * y1 - x1 * y3
-	  alpha3 = Str_Elxy(0,0) * Str_Elxy(1,1) - Str_Elxy(1,0) * Str_Elxy(0,1); // x1 * y2 - x2 * y1
-	  
-	  Two_Area = alpha1 + alpha2 + alpha3;
-	  
-	  Xi = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(2,0)) * (Str_Elxy(1,1) - Str_Elxy(2,1)) - 
-			    (Depart_Foot(1) - Str_Elxy(2,1)) * (Str_Elxy(1,0) - Str_Elxy(2,0)));
-	  
-	  Eta = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(0,0)) * (Str_Elxy(2,1) - Str_Elxy(0,1)) + 
-			    (Depart_Foot(1) - Str_Elxy(0,1)) * (Str_Elxy(0,0) - Str_Elxy(2,0)));
-	  
 // 	  The point may have not left the element but it did move so recompute everything at the new position
-// 	Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
-// 	Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
+	  Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
+	  Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
 
 	  Shape2d(Xi, 
 		  Eta, 
@@ -1412,33 +1253,8 @@ void Conformation(double TIMESTEP,
 	      Vel_Gdsf, 
 	      DetJ);
 
-      Ini_Foot(0) = x;
-      Ini_Foot(1) = y;
+      Cur_Ele = StrNodeDepartElement(Ne,JJ); // New_Ele; //Ne + 1;
 
-      DepartureFoot(VEL_FLAG, 
-		      Ne, 
-		      Vel_Nnm,
-		      TIMESTEP,
-		      Vel_Old, 
-		      Vel_Glxy, 
-		      Vel_Npe, 
-		      Vel_Nod, 
-		      Ele_Neigh,
-		      Ini_Foot,
-		      Depart_Foot,	// output
-		      New_Ele);		// output
-
-//       Cur_Ele = StrNodeDepartElement(Ne,JJ); // New_Ele; //Ne + 1;
-      Cur_Ele = New_Ele;
-      
-//       if(New_Ele != StrNodeDepartElement(Ne,JJ))
-//       {
-// 	std::cout << "Elements not equal" << endl;
-// 	std::cout << "New_Ele = " << New_Ele << endl;
-// 	std::cout << "StrNodeDepartElement = " << StrNodeDepartElement(Ne,JJ) << endl;
-// 	std::cout << "Ne = " << Ne << endl;
-//       }
-      
       // Compute the stress at the departure foot
       for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
       {
@@ -1451,22 +1267,10 @@ void Conformation(double TIMESTEP,
 	El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
 	El_Str(3,i) = Str_Old(Inod,2);
       }
-      
-      alpha1 = Str_Elxy(1,0) * Str_Elxy(2,1) - Str_Elxy(2,0) * Str_Elxy(1,1); // x2 * y3 - x3 * y2
-      alpha2 = Str_Elxy(2,0) * Str_Elxy(0,1) - Str_Elxy(0,0) * Str_Elxy(2,1); // x3 * y1 - x1 * y3
-      alpha3 = Str_Elxy(0,0) * Str_Elxy(1,1) - Str_Elxy(1,0) * Str_Elxy(0,1); // x1 * y2 - x2 * y1
-      
-      Two_Area = alpha1 + alpha2 + alpha3;
-      
-      Xi = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(2,0)) * (Str_Elxy(1,1) - Str_Elxy(2,1)) - 
-			(Depart_Foot(1) - Str_Elxy(2,1)) * (Str_Elxy(1,0) - Str_Elxy(2,0)));
-      
-      Eta = 1.0 / Two_Area * ((Depart_Foot(0) - Str_Elxy(0,0)) * (Str_Elxy(2,1) - Str_Elxy(0,1)) + 
-			(Depart_Foot(1) - Str_Elxy(0,1)) * (Str_Elxy(0,0) - Str_Elxy(2,0)));
-      
+
 //       The point may have not left the element but it did move so recompute everything at the new position
-//       Xi = StrNodeDepartFootx(Ne, JJ); // Y_New_Xi_Eta(0); //
-//       Eta = StrNodeDepartFooty(Ne, JJ); // Y_New_Xi_Eta(1); //
+      Xi = StrNodeDepartFootx(Ne, JJ); // Y_New_Xi_Eta(0); //
+      Eta = StrNodeDepartFooty(Ne, JJ); // Y_New_Xi_Eta(1); //
 
       Shape2d(Xi, 
 	      Eta, 

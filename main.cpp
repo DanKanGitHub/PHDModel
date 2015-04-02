@@ -624,7 +624,11 @@ int main(int argc, char *argv[])
 			  Soln_Cur_t.Values(),
 			  StrNodeDepartFootx,
 			  StrNodeDepartFooty,
-			  StrNodeDepartElement);
+			  StrNodeDepartElement,
+		  Str_Nod,
+		  Str_Glxy,
+		  Str, 
+		  Str_Old);
     
     if(myid == 0)
     {
