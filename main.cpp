@@ -49,6 +49,7 @@
 #include "GaussDepartureFeet.h"
 #include "StrNodeDepartureFeet.h"
 #include "StressReassemble.h"
+#include "StressMatrixDiffNorm.h"
 
 #include "Ifpack_ConfigDefs.h"
 #include "Ifpack_AdditiveSchwarz.h"
@@ -75,11 +76,11 @@ typedef Epetra_IntSerialDenseVector E_ISDV;
 using namespace std;
 
 //Constants
-const int NX = 32;			// Number of element intervals in the horizontal direction
-const int NY = 32;
-const int NGP = 4;			// Number of Gauss points in numerical quadrature, used on the boundary
+const int NX = 128;			// Number of element intervals in the horizontal direction
+const int NY = 128;
+const int NGP = 4;			// Numb#include "Epetra_IntSerialDenseVector.h"er of Gauss points in numerical quadrature, used on the boundary
 const int N_TRI_QUAD = 7;		// Number of Gauss points in numerical quadrature, used in the element
-const int MAX_TIME_STEP_NUM = 1000;	// Maximum number of time interations
+const int MAX_TIME_STEP_NUM = 1300;	// Maximum number of time interations
 
 const int VEL_FLAG = 2;			// Program flags 1 = linear, 2 = quadratic
 const int PRE_FLAG = 1;
@@ -93,7 +94,7 @@ const double YB = 0.0;			// Coordinate of the bottom boundary of the domain.
 const double YT = 1.0;			// Coordinate of the top boundary of the domain.
 // Tianyu's Phasse field paper
 const double SOL_NEW_VIS = 2.0;	// Solvent Newtonian Viscosity, Water dynamic viscosity at 25 C.
-const double POL_NEW_VIS = 100.0; //10000.0;	// Polymer Newtonian Viscosity, Honey dynamic viscosity at 25 C.
+const double POL_NEW_VIS = 1000.0; //10000.0;	// Polymer Newtonian Viscosity, Honey dynamic viscosity at 25 C.
 
 // Issac's Viscoelastic Fluid Description paper
 const double RELAX_TIME = 1080.0; //100.0;	// Relaxation time.
@@ -103,14 +104,14 @@ const double DENSITY_BIO = 1.0;	// Density Biofilm, kg/m^3 at 25 C.
 const double DENSITY_WATER = 1.0;	// Density Water, kg/m^3 at 25 C.
 const double T_ZERO = 60.0;		// seconds (I read Issac's paper for conformation.)
 const double L_ZERO = 0.01;		// meters
-const double TOL = 0.000001;
+const double TOL = 0.000001;		// 0.000001 169 steps before stopping
 const double BIO_TOL = 0.0000001;
 const double DIFF_TOL = 0.000000000001;		// 10^(-12)
 // Hits 0.0000001 for 64X64!
 const double EQUIB_TOL = 0.00001;		// The tolerance that determines if the pre-growth simulation has reached equilibrium
 const double DIFF_COEFF = 0.01; // 0.00001;	// This is a guess.  Diffusion coefffcient for eps diffusion into water
 const double BIO_DIFF_COEFF = 1.0;
-const double TIMESTEPSCALAR = 0.01;
+const double TIMESTEPSCALAR = 0.5; // 0.01
 
 int main(int argc, char *argv[])
 {
@@ -132,7 +133,7 @@ int main(int argc, char *argv[])
   E_ISDM Vel_Nod, Vel_Nod_BC_Hor, Vel_Nod_BC_Ver;
   E_SDV Vel_Norm;
   int Vel_Npe, Vel_Nnm;
-  double Tol;
+  double Tol, Stress_Tol;
   
   // Presure Related
   E_SDM Pre_Glxy;
@@ -155,7 +156,7 @@ int main(int argc, char *argv[])
   E_ISDM Ele_Neigh, GaussDepartElement, StrNodeDepartElement;
   E_SDV Tri_Quad_Wt;
   int Nem, L, n, File_No, Diff_File_No, Bio_File_No;
-  double dx, dy, Time_Step, SolnNorm, SolnDiffNorm, EquibTol;
+  double dx, dy, Time_Step, EquibTol; // SolnNorm, SolnDiffNorm, 
   char HorVelFilename[100];
   char VertVelFilename[100];
   char PreFilename[100];
@@ -489,7 +490,7 @@ int main(int argc, char *argv[])
   Solver_Bio.SetAztecOption(AZ_output,100);
 
   // Initialize Diffusion counter
-  int Diff_Counter = 3;
+  int Diff_Counter = 3; // 3;
   
   for(int Count = 0; Count < Diff_Counter; Count++)
   {
@@ -544,14 +545,25 @@ int main(int argc, char *argv[])
     Diff_File_No++;
 
   }
-  
+
   if(myid == 0)
   {
     std::cout << "Diffusion Complete" << endl;
   }
   
-  sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_00%d.data", Bio_File_No);
-  
+  if(Diff_File_No <= 9)
+  {
+    sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_00%d.data", Bio_File_No);
+  }
+  else if ((Diff_File_No >= 10) && (Diff_File_No < 100))
+  {
+    sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_0%d.data", Bio_File_No);
+  }
+  else if ((Diff_File_No >= 100) && (Diff_File_No < 1000))
+  {
+    sprintf(BioFilename, "./Data/Biofilm/AdvecDiff/BioFile_%d.data", Bio_File_No);
+  }
+
   WriteBioData(BioFilename,
 		Bio_Soln_Cur_t.Values(), 
 		2 * NX + 1);
@@ -575,6 +587,7 @@ int main(int argc, char *argv[])
   
     // Initialize tolerances
     Tol = 1.0;
+    Stress_Tol = 1.0;
 
     Soln_Cur_L = Soln_Cur_t;
     Bio_Soln_Next_t = Bio_Soln_Cur_t;
@@ -591,7 +604,10 @@ int main(int argc, char *argv[])
 		      Vel_Npe,
 		      VEL_FLAG,
 		      Vel_Nnm,
+		      NX,
 		      Time_Step,
+		      dx,
+		      dy,
 		      Vel_Glxy,
 		      Tri_Quad_Pt,
 		      Vel_Nod,
@@ -602,9 +618,17 @@ int main(int argc, char *argv[])
 		      GaussDepartFooty,
 		      GaussDepartElement);
     
+//     std::cout << "GaussDepartFootx = " << GaussDepartFootx << endl;
+//     std::cout << "GaussDepartFooty = " << GaussDepartFooty << endl;
+//     std::cout << "GaussDepartElement = " << GaussDepartElement << endl;
+    
+//     int QWERY;
+//     std::cin >> QWERY;
+    
     if(myid == 0)
     {
       std::cout << "Begin Stress Departure Foot" << endl;
+//       std::cout << "Ele_Neigh = " << Ele_Neigh  << endl;
     }
     
     StrNodeDepartureFeet(myid,
@@ -616,6 +640,8 @@ int main(int argc, char *argv[])
 			  NX,
 			  STRESS_FLAG,
 			  Time_Step,
+			  dx,
+			  dy,
 			  Vel_Glxy,
 			  Vel_Nod,
 			  Ele_Neigh,
@@ -625,17 +651,28 @@ int main(int argc, char *argv[])
 			  StrNodeDepartFootx,
 			  StrNodeDepartFooty,
 			  StrNodeDepartElement,
-		  Str_Nod,
-		  Str_Glxy,
-		  Str, 
-		  Str_Old);
+			  Str_Nod,
+			  Str_Glxy,
+			  Str, 
+			  Str_Old);
+    
+//     std::cout << "StrNodeDepartFootx = " << StrNodeDepartFootx << endl;
+//     std::cout << "StrNodeDepartFooty = " << StrNodeDepartFooty << endl;
+//     std::cout << "StrNodeDepartElement = " << StrNodeDepartElement << endl;
+    
+//     int QWERY;
+//     std::cin >> QWERY;
     
     if(myid == 0)
     {
       std::cout << "Finished Stress Departure Foot" << endl;
     }
     
-    while (Tol > TOL) // && L <= 10)
+    if(n == 10) {
+      Time_Step = 0.5 * dx;
+    }
+    
+    while ((Tol > TOL) & (Stress_Tol > TOL)) // && L <= 10)
     {
       
       A_VP.PutScalar(0.0);
@@ -647,7 +684,7 @@ int main(int argc, char *argv[])
 	std::cout << "Begin InitialGuess" << endl;
       }
       
-      if((n == 0) & (L == 0))
+      if(L == 0)
       {
 	InitialGuess(Proc_Node_Part.All_Proc_Nodes_VP.Values(), 
 		    Vel_Npe,
@@ -691,7 +728,7 @@ int main(int argc, char *argv[])
 		      DENSITY_BIO,
 		      T_ZERO,
 		      L_ZERO,
-		      Time_Step,
+		      dx, // Time_Step,
 		      NX,
 		      NY,
 		      NGP,
@@ -729,12 +766,19 @@ int main(int argc, char *argv[])
 		      A_VP, 	// output
 		      b_VP);	// output
 
+      if(myid == 0)
+      {
+	std::cout << "Out of Sparse" << endl;
+      }
+      
       // Prathish's Code
       Prec_VP->Compute();
 
       Solver_VP.Iterate(10000, TOL);
 
       Soln_Next_L.Import(x_VP,CompleteSolution_Importer_VP,Add);
+
+//       Soln_Next_L = Soln_Cur_L;
 
       if(myid == 0)
       {
@@ -763,16 +807,13 @@ int main(int argc, char *argv[])
 		   T_ZERO,
 		   L_ZERO,
 		   Vel_Npe, 
-		   Pre_Npe,
 		   Str_Npe, 
 		   Nem, 
 		   Vel_Nnm,
 		   myid,
 		   Vel_Nod, 
-		   Pre_Nod, 
 		   Str_Nod,
 		   Vel_Glxy, 
-		   Pre_Glxy, 
 		   Str_Glxy,
 		   Ele_Neigh,
 		   VEL_FLAG, 
@@ -789,13 +830,31 @@ int main(int argc, char *argv[])
 		   Proc_Node_Part.My_Proc_Eles,
 		   Str_New);	//output
 
-      // Update the iteration variables
+//       Stress_Tol = StressMatrixDiffNorm(Str_Nnm,
+// 		      myid,
+// 		      Str_New,
+// 		      Str);
+      
+      Stress_Tol = 0.0;
+
+      for(int i = 0; i < Str_Nnm; i++)
+      {
+	Stress_Tol += (Str(i,0) - Str_New(i,0)) * (Str(i,0) - Str_New(i,0));
+	Stress_Tol += (Str(i,1) - Str_New(i,1)) * (Str(i,1) - Str_New(i,1));
+	Stress_Tol += (Str(i,2) - Str_New(i,2)) * (Str(i,2) - Str_New(i,2));
+      }
+      
+      Stress_Tol = sqrt(Stress_Tol);
+      
+//       std::cout << "Stress_Tol = " << Stress_Tol << endl;
+      
+//       Update the iteration variables
       Str = Str_New;
-//       StressReassemble(Str_Nnm,
-// 		       myid,
-// 		       Str_New, 
-// 		       Proc_Node_Part.All_Proc_Nodes_VP, 
-// 		       Str);
+      StressReassemble(Str_Nnm,
+		       myid,
+		       Str_New, 
+		       Proc_Node_Part.All_Proc_Nodes_VP, 
+		       Str);
 
       if(myid == 0)
       {

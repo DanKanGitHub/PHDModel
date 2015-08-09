@@ -299,42 +299,6 @@
 
 #include "Conformation.h"
 
-// void Conformation(double TIMESTEP, 
-// 		  double Sol_Vis,
-// 		  double Poly_Vis,
-// 		  int NX,
-// 		  double RETARD_TIME,
-// 		  double Sol_Density,
-// 		  double Poly_Density,
-// 		  double T_ZERO,
-// 		  double L_ZERO,
-// 		  int Vel_Npe, 
-// 		  int Pre_Npe,
-// 		  int Str_Npe, 
-// 		  int Nem, 
-// 		  int Vel_Nnm,
-// 		  int myid,
-// 		  E_ISDM Vel_Nod, 
-// 		  E_ISDM Pre_Nod, 
-// 		  E_ISDM Str_Nod,
-// 		  E_SDM Vel_Glxy, 
-// 		  E_SDM Pre_Glxy, 
-// 		  E_SDM Str_Glxy,
-// 		  E_ISDM Ele_Neigh,
-// 		  int VEL_FLAG, 
-// 		  int STRESS_FLAG, 
-// 		  double *Vel, 
-// 		  double *Vel_Old,
-// 		  double *Bio,
-// 		  E_SDM Str, 
-// 		  E_SDM Str_Old,
-// 		  E_SDM StrNodeDepartFootx,
-// 		  E_SDM StrNodeDepartFooty,
-// 		  E_ISDM StrNodeDepartElement,
-// 		  E_ISDV All_Proc_Nodes,
-// 		  E_ISDV My_Proc_Eles,
-// 		  E_SDM & Str_New)
-
 void Conformation(double TIMESTEP, 
 		  double Sol_Vis,
 		  double Poly_Vis,
@@ -345,16 +309,13 @@ void Conformation(double TIMESTEP,
 		  double T_ZERO,
 		  double L_ZERO,
 		  int Vel_Npe, 
-		  int Pre_Npe,
 		  int Str_Npe, 
 		  int Nem, 
 		  int Vel_Nnm,
 		  int myid,
 		  E_ISDM Vel_Nod, 
-		  E_ISDM Pre_Nod, 
 		  E_ISDM Str_Nod,
 		  E_SDM Vel_Glxy, 
-		  E_SDM Pre_Glxy, 
 		  E_SDM Str_Glxy,
 		  E_ISDM Ele_Neigh,
 		  int VEL_FLAG, 
@@ -374,11 +335,7 @@ void Conformation(double TIMESTEP,
   // Velocity variables
   E_SDM Vel_Elxy, Vel_Gdsf, El_Vel, Grad_Vel, Det_Inv_Grad_Vel;
   int Vel_Inod;
-  
-  // Pressure variables
-  E_SDM Pre_Elxy;
-  E_SDV Pre_Sf;
-  
+
   // Stress variables
   E_SDM El_Dep_Str, El_Str, Str_Elxy;
   E_SDM Str_Gdsf;
@@ -391,8 +348,8 @@ void Conformation(double TIMESTEP,
   // Other variables
   E_SDM Gdsf, TempMat1, TempMat2, TempMat3, TempMat4, Dep_Gdsf;
   E_SDV Sf, Y_New_Xi_Eta, Ini_Foot, Depart_Foot, Dep_Sf;
-  int Inod, New_Ele, Cur_Ele, JJ;//, Gauss_Pt_Num, jj, ii;
-  double Xi, Eta, Coeff, Det_Grad_Vel, Trace_Grad_Vel;//Const1, Const2, ;
+  int Inod, Cur_Ele, JJ;
+  double Xi, Eta, Coeff, Det_Grad_Vel, Trace_Grad_Vel;
   double alpha1, alpha2, alpha3, x, y, x1, x2, x3, y1, y2, y3, Two_Area, DetJ;
   double RetardDivRelax, U_Zero, Effective_Pol_Vis, Effective_Den, ALPHA, BETA, P_Zero, Wi;
   double GaussPt_Bio_Weight, Effective_Vis;
@@ -405,10 +362,7 @@ void Conformation(double TIMESTEP,
   El_Vel.Shape(2, Vel_Npe);
   Sf.Size(Vel_Npe);  	// value of shape functions at (xi,eta)
   Grad_Vel.Shape(2, 2);
-  
-  // Pressure terms
-  Pre_Elxy.Shape(Pre_Npe, 2);
-  
+
   // Stress terms
   El_Dep_Str.Shape(2,2);	// The Stress at the departure feet
   Str_Elxy.Shape(Str_Npe,2);
@@ -434,13 +388,6 @@ void Conformation(double TIMESTEP,
 
   for (int Ne = 0; Ne <= Nem-1; Ne++) 	// loop over all the elements
   {
-    for (int i = 0; i <= Pre_Npe-1; i++) // get global coordinates of local nodes of element NE
-    {
-      Inod = Pre_Nod(Ne,i) - 1;		// Global node number (minus one for indexing) of local node.
-      Pre_Elxy(i,0) = Pre_Glxy(Inod,0);  // x-coordinate
-      Pre_Elxy(i,1) = Pre_Glxy(Inod,1);  // y-coordinate
-    }
-
     for (int i = 0; i <= Vel_Npe-1; i++) 	// get global coordinates of local nodes of element NE
     {
       Vel_Inod = Vel_Nod(Ne,i) - 1;		// Global node number (minus one for indexing) of local node.
@@ -470,12 +417,12 @@ void Conformation(double TIMESTEP,
 	y = Vel_Glxy(Vel_Inod, 1);
 	
 	// Only the vertices of each element are used here
-	x1 = Pre_Elxy(0,0);
-	x2 = Pre_Elxy(1,0);
-	x3 = Pre_Elxy(2,0);
-	y1 = Pre_Elxy(0,1);
-	y2 = Pre_Elxy(1,1);
-	y3 = Pre_Elxy(2,1);
+	x1 = Vel_Elxy(0,0);
+	x2 = Vel_Elxy(1,0);
+	x3 = Vel_Elxy(2,0);
+	y1 = Vel_Elxy(0,1);
+	y2 = Vel_Elxy(1,1);
+	y3 = Vel_Elxy(2,1);
 	
 	Xi  = 1.0 / Two_Area * ((x - x3) * (y2 - y3) - (y - y3) * (x2 - x3));
 	Eta = 1.0 / Two_Area * ((x - x1) * (y3 - y1) + (y - y1) * (x1 - x3));
@@ -656,12 +603,12 @@ void Conformation(double TIMESTEP,
 	y = Vel_Glxy(Vel_Inod, 1);
 	
 	// Only the vertices of each element are used here
-	x1 = Pre_Elxy(0,0);
-	x2 = Pre_Elxy(1,0);
-	x3 = Pre_Elxy(2,0);
-	y1 = Pre_Elxy(0,1);
-	y2 = Pre_Elxy(1,1);
-	y3 = Pre_Elxy(2,1);
+	x1 = Vel_Elxy(0,0);
+	x2 = Vel_Elxy(1,0);
+	x3 = Vel_Elxy(2,0);
+	y1 = Vel_Elxy(0,1);
+	y2 = Vel_Elxy(1,1);
+	y3 = Vel_Elxy(2,1);
 	
 	Xi  = 1.0 / Two_Area * ((x - x3) * (y2 - y3) - (y - y3) * (x2 - x3));
 	Eta = 1.0 / Two_Area * ((x - x1) * (y3 - y1) + (y - y1) * (x1 - x3));
@@ -854,12 +801,12 @@ void Conformation(double TIMESTEP,
       y = Vel_Glxy(Vel_Inod, 1);
       
       // Only the vertices of each element are used here
-      x1 = Pre_Elxy(0,0);
-      x2 = Pre_Elxy(1,0);
-      x3 = Pre_Elxy(2,0);
-      y1 = Pre_Elxy(0,1);
-      y2 = Pre_Elxy(1,1);
-      y3 = Pre_Elxy(2,1);
+      x1 = Vel_Elxy(0,0);
+      x2 = Vel_Elxy(1,0);
+      x3 = Vel_Elxy(2,0);
+      y1 = Vel_Elxy(0,1);
+      y2 = Vel_Elxy(1,1);
+      y3 = Vel_Elxy(2,1);
       
       Xi  = 1.0 / Two_Area * ((x - x3) * (y2 - y3) - (y - y3) * (x2 - x3));
       Eta = 1.0 / Two_Area * ((x - x1) * (y3 - y1) + (y - y1) * (x1 - x3));
@@ -1047,12 +994,12 @@ void Conformation(double TIMESTEP,
 	  y = Vel_Glxy(Vel_Inod, 1);
 	  
 	  // Only the vertices of each element are used here
-	  x1 = Pre_Elxy(0,0);
-	  x2 = Pre_Elxy(1,0);
-	  x3 = Pre_Elxy(2,0);
-	  y1 = Pre_Elxy(0,1);
-	  y2 = Pre_Elxy(1,1);
-	  y3 = Pre_Elxy(2,1);
+	  x1 = Vel_Elxy(0,0);
+	  x2 = Vel_Elxy(1,0);
+	  x3 = Vel_Elxy(2,0);
+	  y1 = Vel_Elxy(0,1);
+	  y2 = Vel_Elxy(1,1);
+	  y3 = Vel_Elxy(2,1);
 	  
 	  Xi  = 1.0 / Two_Area * ((x - x3) * (y2 - y3) - (y - y3) * (x2 - x3));
 	  Eta = 1.0 / Two_Area * ((x - x1) * (y3 - y1) + (y - y1) * (x1 - x3));
@@ -1234,12 +1181,12 @@ void Conformation(double TIMESTEP,
       y = Vel_Glxy(Vel_Inod, 1);
       
       // Only the vertices of each element are used here
-      x1 = Pre_Elxy(0,0);
-      x2 = Pre_Elxy(1,0);
-      x3 = Pre_Elxy(2,0);
-      y1 = Pre_Elxy(0,1);
-      y2 = Pre_Elxy(1,1);
-      y3 = Pre_Elxy(2,1);
+      x1 = Vel_Elxy(0,0);
+      x2 = Vel_Elxy(1,0);
+      x3 = Vel_Elxy(2,0);
+      y1 = Vel_Elxy(0,1);
+      y2 = Vel_Elxy(1,1);
+      y3 = Vel_Elxy(2,1);
       
       Xi  = 1.0 / Two_Area * ((x - x3) * (y2 - y3) - (y - y3) * (x2 - x3));
       Eta = 1.0 / Two_Area * ((x - x1) * (y3 - y1) + (y - y1) * (x1 - x3));
@@ -1363,9 +1310,7 @@ void Conformation(double TIMESTEP,
       TempMat2(0,1) = - TIMESTEP * Det_Inv_Grad_Vel(0,1);
       TempMat2(1,0) = - TIMESTEP * Det_Inv_Grad_Vel(1,0);
       TempMat2(1,1) = 1 - TIMESTEP * Det_Inv_Grad_Vel(1,1);
-      
-//       std::cout << "F = " << TempMat2 << endl;
-      
+
       for(int i = 0; i <= 1; i++)
       {
 	for(int k = 0; k <= 1; k++)

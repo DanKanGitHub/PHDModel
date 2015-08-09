@@ -6,7 +6,10 @@ void GaussDepartureFeet(int myid,
 			int Vel_Npe,
 			int VEL_FLAG,
 			int Vel_Nnm,
+			int NX,
 			double TIMESTEP,
+			double dx,
+			double dy,
 			E_SDM Vel_Glxy,
 			E_SDM Tri_Quad_Pt,
 			E_ISDM Vel_Nod,
@@ -69,11 +72,18 @@ void GaussDepartureFeet(int myid,
 	Ini_Foot(0) = 1.0 / (b1 * c2 - c1 * b2) * (c2 * a1 - c1 * a2);
 
 	Ini_Foot(1) = 1.0 / (b1 * c2 - c1 * b2) * (b1 * a2 - b2 * a1);
+	
+// 	std::cout << "Ini_Foot(0) = " << Ini_Foot(0) << endl;
+// 	std::cout << "Ini_Foot(1) = " << Ini_Foot(1) << endl;
+// 	std::cout << "Ne = " << Ne << endl;
 
 	DepartureFoot(VEL_FLAG, 
 		      Ne, 
 		      Vel_Nnm,
+		      NX,
 		      TIMESTEP,
+		      dx,
+		      dy,
 		      Vel_Old, 
 		      Vel_Glxy, 
 		      Vel_Npe, 
@@ -82,6 +92,9 @@ void GaussDepartureFeet(int myid,
 		      Ini_Foot,		// in x,y space
 		      Depart_Foot,	// output in x,y space
 		      New_Ele);		// output
+	
+// 	int QWERTY;
+// 	std::cin >> QWERTY;
 
 	// Determine the element the Gauss point has moved into
 	if(New_Ele-1 != Ne)
@@ -102,7 +115,7 @@ void GaussDepartureFeet(int myid,
 	Two_Area = alpha1 + alpha2 + alpha3;
 	
 	GaussDepartFootx(Ne, Ni) = 1.0 / Two_Area * ((Depart_Foot(0) - Vel_Elxy(2,0)) * (Vel_Elxy(1,1) - Vel_Elxy(2,1)) - 
-			  (Depart_Foot(1) - Vel_Elxy(2,1)) * (Vel_Elxy(1,0) - Vel_Elxy(2,0)));
+			 (Depart_Foot(1) - Vel_Elxy(2,1)) * (Vel_Elxy(1,0) - Vel_Elxy(2,0)));
 	
 	GaussDepartFooty(Ne, Ni) = 1.0 / Two_Area * ((Depart_Foot(0) - Vel_Elxy(0,0)) * (Vel_Elxy(2,1) - Vel_Elxy(0,1)) + 
 			  (Depart_Foot(1) - Vel_Elxy(0,1)) * (Vel_Elxy(0,0) - Vel_Elxy(2,0)));

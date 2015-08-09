@@ -232,9 +232,11 @@ void SparseAssembly(double Sol_Vis,
 
 	New_Ele = GaussDepartElement(Ne, Ni);
 	
+// 	std::cout << "Here ok?" << endl;
+	
 	for (int k = 0; k <= Vel_Npe-1; k++) // get global coordinates of local nodes of element NE
 	{
-	  Inod = Vel_Nod(New_Ele-1,k) - 1;		// Global node number of local node.
+	  Inod = Vel_Nod(New_Ele - 1,k) - 1;		// Global node number of local node.
 	  Vel_Elxy(k,0) = Vel_Glxy(Inod,0);	// x-coordinate of te new element
 	  Vel_Elxy(k,1) = Vel_Glxy(Inod,1);	// y-coordinate of the new element
     
@@ -266,7 +268,7 @@ void SparseAssembly(double Sol_Vis,
 	{
 	  Depart_Vel(0) += El_Vel(0,k) * Dep_Sf(k);
 	  Depart_Vel(1) += El_Vel(1,k) * Dep_Sf(k);
-	  
+
 	  Depart_Bio += El_Bio(k) * Dep_Sf(k);
 	}
 	
@@ -901,6 +903,7 @@ void SparseAssembly(double Sol_Vis,
 	} // pre k
       } // for Ni
     } // ele if
+//     std::cout << "Element Number = " << Ne << endl;
   } // for Ne
 
   delete [] Values1;

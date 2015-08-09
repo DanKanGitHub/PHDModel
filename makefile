@@ -8,7 +8,7 @@ fem2d: main.o VelBioMesh2d.o PreMesh2d.o SparseAssembly.o EquibSparseAssembly.o 
 	DepartureFoot.o Shape2d.o FeetSearch.o functions2.o NatBoundary2d.o PreEssenBoundary2d.o VelEssenBoundary2d.o InitMatZero.o InitialBio.o \
 	InitMatZeroBio.o BioSparseAssembly.o BioDiffSparseAssembly.o ProcNodePartitionClass.o BioWeightFunc.o RetardationDividedByRelaxation.o \
 	PolymericViscosityFunctionofBioVolFrac.o WriteVelPreData.o WriteBioData.o WriteStrData.o VectorNorm.o VectorDiffNorm.o InitialGuess.o StrMesh2d.o \
-	VelFunctions.o GaussDepartureFeet.o StrNodeDepartureFeet.o NodeStress.o StressReassemble.o
+	VelFunctions.o GaussDepartureFeet.o StrNodeDepartureFeet.o NodeStress.o StressReassemble.o StressMatrixDiffNorm.o
 	${CC} -o $@ $^  $(LINKS)
 
 main.o: main.cpp
@@ -113,7 +113,6 @@ VectorNorm.o: VectorNorm.cpp VectorNorm.h
 InitialGuess.o: InitialGuess.cpp InitialGuess.h
 	${CC} InitialGuess.cpp -c ${CFLAGS}
 
-
 VelFunctions.o: VelFunctions.cpp VelFunctions.h
 	${CC} VelFunctions.cpp -c ${CFLAGS}
 
@@ -125,6 +124,9 @@ StrNodeDepartureFeet.o: StrNodeDepartureFeet.cpp StrNodeDepartureFeet.h Departur
 
 StressReassemble.o: StressReassemble.cpp StressReassemble.h
 	${CC} StressReassemble.cpp -c ${CFLAGS}
+
+StressMatrixDiffNorm.o: StressMatrixDiffNorm.cpp StressMatrixDiffNorm.h
+	${CC} StressMatrixDiffNorm.cpp -c ${CFLAGS}
 
 clean:
 	rm -rf *.o
