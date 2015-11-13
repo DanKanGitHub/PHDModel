@@ -32,20 +32,20 @@ void InitialGuess(int *ProcNodes,
 	  
 	  Error = x_VP.ReplaceGlobalValues(1, Values, Indices);
 	  
-	  if(Error != 0)
-	  {
-	    std::cout << "Broke 1" << endl;
-	    Error = 0;
-	    
-	    std::cout << "GlobalNode = " << GlobalNode << endl;
-	    std::cout << "Element = " << i << endl;
-	    std::cout << "Local Node = " << j << endl;
-	    std::cout << "PreviousSoln[GlobalNode] = " << PreviousSoln[GlobalNode] << endl;
-	    std::cout << "Values[0] = " << Values[0] << endl;
-	    std::cout << "Indices[0] = " << Indices[0] << endl;
-	    
-// 	    std::cin >> Error;
-	  }
+// 	  if(Error != 0)
+// 	  {
+// 	    std::cout << "Broke 1" << endl;
+// 	    Error = 0;
+// 	    
+// 	    std::cout << "GlobalNode = " << GlobalNode << endl;
+// 	    std::cout << "Element = " << i << endl;
+// 	    std::cout << "Local Node = " << j << endl;
+// 	    std::cout << "PreviousSoln[GlobalNode] = " << PreviousSoln[GlobalNode] << endl;
+// 	    std::cout << "Values[0] = " << Values[0] << endl;
+// 	    std::cout << "Indices[0] = " << Indices[0] << endl;
+// 	    
+// // 	    std::cin >> Error;
+// 	  }
 	  
 	  // Vertical Vel
 	  Values[0] = PreviousSoln[GlobalNode + Vel_Nnm];
@@ -53,20 +53,20 @@ void InitialGuess(int *ProcNodes,
 	  
 	  Error = x_VP.ReplaceGlobalValues(1, Values, Indices);
 	  
-	  if(Error != 0)
-	  {
-	    std::cout << "Broke 2" << endl;
-	    Error = 0;
-	    
-	    std::cout << "GlobalNode = " << GlobalNode << endl;
-	    std::cout << "Element = " << i << endl;
-	    std::cout << "Local Node = " << j << endl;
-	    std::cout << "PreviousSoln[GlobalNode] = " << PreviousSoln[GlobalNode] << endl;
-	    std::cout << "Values[0] = " << Values[0] << endl;
-	    std::cout << "Indices[0] = " << Indices[0] << endl;
-	    
-// 	    std::cin >> Error;
-	  }
+// 	  if(Error != 0)
+// 	  {
+// 	    std::cout << "Broke 2" << endl;
+// 	    Error = 0;
+// 	    
+// 	    std::cout << "GlobalNode = " << GlobalNode << endl;
+// 	    std::cout << "Element = " << i << endl;
+// 	    std::cout << "Local Node = " << j << endl;
+// 	    std::cout << "PreviousSoln[GlobalNode] = " << PreviousSoln[GlobalNode] << endl;
+// 	    std::cout << "Values[0] = " << Values[0] << endl;
+// 	    std::cout << "Indices[0] = " << Indices[0] << endl;
+// 	    
+// // 	    std::cin >> Error;
+// 	  }
 	  
 	  // Pressure
 	  if((j == 0) | (j == 1) | (j == 2))
@@ -78,20 +78,20 @@ void InitialGuess(int *ProcNodes,
 	    
 	    Error = x_VP.ReplaceGlobalValues(1, Values, Indices);
 	    
-	    if(Error != 0)
-	    {
-	      std::cout << "Broke 3" << endl;
-	      Error = 0;
-	      
-	      std::cout << "GlobalNode = " << GlobalNode << endl;
-	      std::cout << "Element = " << i << endl;
-	      std::cout << "Local Node = " << j << endl;
-	      std::cout << "PreviousSoln[GlobalNode] = " << PreviousSoln[GlobalNode] << endl;
-	      std::cout << "Values[0] = " << Values[0] << endl;
-	      std::cout << "Indices[0] = " << Indices[0] << endl;
-	      
-// 	      std::cin >> Error;
-	    }
+// 	    if(Error != 0)
+// 	    {
+// 	      std::cout << "Broke 3" << endl;
+// 	      Error = 0;
+// 	      
+// 	      std::cout << "GlobalNode = " << GlobalNode << endl;
+// 	      std::cout << "Element = " << i << endl;
+// 	      std::cout << "Local Node = " << j << endl;
+// 	      std::cout << "PreviousSoln[GlobalNode] = " << PreviousSoln[GlobalNode] << endl;
+// 	      std::cout << "Values[0] = " << Values[0] << endl;
+// 	      std::cout << "Indices[0] = " << Indices[0] << endl;
+// 	      
+// // 	      std::cin >> Error;
+// 	    }
 	  }
 	}
       }

@@ -1,4 +1,5 @@
 // Velocity and its partials called VelFunctions
+// Used by InitialVel.cpp
 
 #include "VelFunctions.h"
 
@@ -7,7 +8,7 @@ double HorizVel(double x,
 {
   double z;
   
-  z = -4.0 * y * (y - 1.0);// The max vel is 1 with a coeff of -4.
+  z = 0.0; // -4.0 * y * (y - 1.0);// The max vel is 1 with a coeff of -4.
   
   return z;
 }
@@ -37,7 +38,7 @@ double PartialHorizVelPartialy(double x,
 {
   double z;
   
-  z = -8.0 * y + 4.0;
+  z = 0.0; // -8.0 * y + 4.0;
   
   return z;
 }

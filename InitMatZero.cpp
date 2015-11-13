@@ -1,9 +1,5 @@
-// Assembles the solution matrix and the RHS
-
-// U_Feet is NNMX3 where each row is the global node number the departure foot is assocaited 
-// with and the entires in the row are the x,y coordinates of the departure foot followed by 
-// the ellemnt the foot is located in
-
+// Initializes the solution matrix to zero for every entry that will have a 
+// value incerted.
 
 #include "InitMatZero.h"
 
@@ -22,8 +18,9 @@ void InitMatZero(int Vel_Npe,
 		  int myid,
 		  E_CM & A) {
 
-  //Vel
-  // There are, at most, 6 horizontal vel, 6 vertical vel and 3 pre components per row
+  // There are, at most, 6 horizontal vel, 6 vertical vel and 3 pre nodes that a processor 
+  // could own.  As such there are at most 15 components computed per element andd at most 15
+  // values "entered" in a row of the matrix per element.
   double *Values;
   Values = new double[15];
   int *Indices;
@@ -38,6 +35,7 @@ void InitMatZero(int Vel_Npe,
   
   for (int Ne = 0; Ne < Nem; Ne++) 		// loop over all the elements
   {
+    // If a processor has a node in the element then proceed
     if(My_Proc_Eles(Ne) == myid)
     {
 
@@ -45,6 +43,7 @@ void InitMatZero(int Vel_Npe,
 // !!!!!!!!!!!!!!! UPPER MATRICES START HERE !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+      // loop over nodes
       for (int i = 0; i <= Vel_Npe-1; i++)
       {
 	
@@ -54,85 +53,96 @@ void InitMatZero(int Vel_Npe,
 	// The row of the global matrix
 	ii = Vel_Nod(Ne,i) - 1;
 
+	// If the node belongs to the processor then proceed
 	if(All_Proc_Nodes_VP(ii) == myid)
 	{
-	  if(Vel_Nod_BC_Hor(Ne,i) != 1) // global node ii is not a BC
+	  // global node ii is not a BC and hence the row is not an "identity" row
+	  if(Vel_Nod_BC_Hor(Ne,i) != 1)
 	  {
+	    // Loop over the nodes in the element again for the column entries
 	    for(int j = 0; j <= Vel_Npe-1; j++)
 	    {
 	      // The column of the global matrix
 	      jj = Vel_Nod(Ne,j) - 1;
-	      
-	      
-  // 	    if(All_Proc_Nodes_VP(jj) == myid)
-  // 	    {
-		if(Vel_Nod_BC_Hor(Ne,j) != 1)
-		{
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!! A11 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-      // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-		  Values[IndexCounter] = 0.0;
-		  
-		  Indices[IndexCounter] = jj;
+	      // Only record a zero if the column is not associated with a BC because
+	      // if the column is associated with a BC then nothing will be enteried into
+	      // the matrix but rather the RHS will get updated.
+	      if(Vel_Nod_BC_Hor(Ne,j) != 1) // && Vel_Nod_BC_Hor(Ne,j) != 2)
+	      {
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!! A11 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	      // The horizontal velocity contribution to the horizontal velocity.
+		Values[IndexCounter] = 0.0;
+		
+		Indices[IndexCounter] = jj;
 
-		  IndexCounter++;
-		}
-  // 	    }
+		IndexCounter++;
+		
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!! A12 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	      // The vertical velocity contribution to the horizontal velocity
+		Values[IndexCounter] = 0.0;
+		
+		Indices[IndexCounter] = jj + Vel_Nnm;
+		
+		IndexCounter++;
+	      }
 
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!! A12 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-  // 	    if(All_Proc_Nodes_VP(jj + Vel_Nnm) == myid)
-  // 	    {
-
-		if(Vel_Nod_BC_Ver(Ne,j) != 1)
-		{
-		  Values[IndexCounter] = 0.0;
-		  
-		  Indices[IndexCounter] = jj + Vel_Nnm;
-		  
-		  IndexCounter++;
-		}
-  // 	    }
+	      // The vertical velocity contribution to the horizontal velocity
+// 	      if(Vel_Nod_BC_Ver(Ne,j) != 1)
+// 	      {
+// 		Values[IndexCounter] = 0.0;
+// 		
+// 		Indices[IndexCounter] = jj + Vel_Nnm;
+// 		
+// 		IndexCounter++;
+// 	      }
 	    } // vel j
 
-	    // PRE COLUMNS CONT
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!! B1 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    // The pressure contribution to the horizontal velocity
 	    for (int k = 0; k <= Pre_Npe-1; k++)
 	    {
 	      kk = Pre_Nod(Ne,k) - 1;
-  // 	    if(All_Proc_Nodes_VP(kk + 2 * Vel_Nnm) == myid)
-  // 	    {
-		if(Pre_Nod_BC(Ne,k) != 1)
-		{
 
-		  Values[IndexCounter] = 0.0;
+// 	      if(Pre_Nod_BC(Ne,k) != 1)
+// 	      {
 
-		  Indices[IndexCounter] = kk + 2 * Vel_Nnm;
-		  
-		  IndexCounter++;
-		}
-  // 	    }
+	      Values[IndexCounter] = 0.0;
+
+	      Indices[IndexCounter] = kk + 2 * Vel_Nnm;
+	      
+	      IndexCounter++;
+// 	      }
 	    } // pre k
 
 	    //Build Global Matrix A one row at a time
 	    Error = A.InsertGlobalValues(ii, IndexCounter, Values, Indices);
 	    
-	    if(Error != 0 && myid == 1)
-	    {
-	      std::cout << "InitMat Zero Broke 1" << endl;
-	      std::cout << "myid =" << myid << endl;
-	      std::cout << "ii = " << ii << endl;
-	      std::cout << "jj = " << jj << endl;
-	      std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
-	      Error = 0;
-	    }
+// 	    if(Error != 0 && myid == 1)
+// 	    {
+// 	      std::cout << "InitMat Zero Broke 1" << endl;
+// 	      std::cout << "myid =" << myid << endl;
+// 	      std::cout << "ii = " << ii << endl;
+// 	      std::cout << "jj = " << jj << endl;
+// 	      std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
+// 	      Error = 0;
+// 	    }
 	    
 	  } // if ii != 1
-	  else // if(Vel_Nod_BC_Hor(Ne,i) == 1)// && All_Proc_Nodes_VP(ii) == myid) // Essential BC on this row
+	  else
 	  {
 
-	    Values[0] = 0.0;
+	    // If the row is associated with a BC then it is an "identity" row
+	    Values[0] = 1.0;
 
 	    Indices[0] = ii;
 	    
@@ -140,15 +150,15 @@ void InitMatZero(int Vel_Npe,
 	    
 	    Error = A.InsertGlobalValues(ii, IndexCounter, Values, Indices);
 	    
-	    if(Error != 0)
-	    {
-	      std::cout << "InitMat Zero Broke 2" << endl;
-	      std::cout << "myid =" << myid << endl;
-	      std::cout << "ii = " << ii << endl;
-	      std::cout << "jj = " << jj << endl;
-	      std::cout << "All_Proc_Nodes_VP(ii) = " << All_Proc_Nodes_VP(ii) << endl;
-	      Error = 0;
-	    }
+// 	    if(Error != 0)
+// 	    {
+// 	      std::cout << "InitMat Zero Broke 2" << endl;
+// 	      std::cout << "myid =" << myid << endl;
+// 	      std::cout << "ii = " << ii << endl;
+// 	      std::cout << "jj = " << jj << endl;
+// 	      std::cout << "All_Proc_Nodes_VP(ii) = " << All_Proc_Nodes_VP(ii) << endl;
+// 	      Error = 0;
+// 	    }
 	  } // if ii for ii = 1
 	}
       } // vel i
@@ -166,9 +176,11 @@ void InitMatZero(int Vel_Npe,
 	// The row of the global matrix
 	ii = Vel_Nod(Ne,i) - 1;
 	
+	// Everything that follows is logically the same as above but the following
+	// conditional statement is fundamentally different.
 	if(All_Proc_Nodes_VP(ii + Vel_Nnm) == myid)
 	{
-	  if(Vel_Nod_BC_Ver(Ne,i) != 1) // global node ii is not a BC
+	  if(Vel_Nod_BC_Ver(Ne,i) != 1) // global node ii is not an EBC
 	  {
 	    // VEL COLUMNS
 	    for(int j = 0; j <= Vel_Npe-1; j++)
@@ -176,15 +188,23 @@ void InitMatZero(int Vel_Npe,
 	      // The column of the global matrix
 	      jj = Vel_Nod(Ne,j) - 1;
 	      
-	      if(Vel_Nod_BC_Hor(Ne,j) != 1) // && All_Proc_Nodes_VP(jj) == myid)
+	      if(Vel_Nod_BC_Hor(Ne,j) != 1)// && Vel_Nod_BC_Hor(Ne,j) != 2)
 	      {
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!! A21 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 		Values[IndexCounter] = 0.0;
 
 		Indices[IndexCounter] = jj;
+		
+		IndexCounter++;
+		
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!! A22 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		Values[IndexCounter] = 0.0;
+
+		Indices[IndexCounter] = jj + Vel_Nnm;
 		
 		IndexCounter++;
 	      }
@@ -193,52 +213,48 @@ void InitMatZero(int Vel_Npe,
     // !!!!!!!!!!!!!!!!!!!!!!!!!!! A22 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	      if(Vel_Nod_BC_Ver(Ne,j) != 1) // && All_Proc_Nodes_VP(jj + Vel_Nnm) == myid)
-	      {
-		Values[IndexCounter] = 0.0;
-
-		Indices[IndexCounter] = jj + Vel_Nnm;
-		
-		IndexCounter++;
-	      }
+// 	      if(Vel_Nod_BC_Ver(Ne,j) != 1)
+// 	      {
+// 		Values[IndexCounter] = 0.0;
+// 
+// 		Indices[IndexCounter] = jj + Vel_Nnm;
+// 		
+// 		IndexCounter++;
+// 	      }
 	    } // vel j
 
 	    // PRE COLUMNS CONT
 	    for (int k = 0; k <= Pre_Npe-1; k++)
 	    {
 	      kk = Pre_Nod(Ne,k) - 1;
-	      
-  // 	    if(All_Proc_Nodes_VP(kk + 2 * Vel_Nnm) == myid)
-  // 	    {
-	      
-		if(Pre_Nod_BC(Ne,k) != 1)
-		{
 
-		  Values[IndexCounter] = 0.0;
+// 		if(Pre_Nod_BC(Ne,k) != 1)
+// 		{
 
-		  Indices[IndexCounter] = kk + 2 * Vel_Nnm;
+	      Values[IndexCounter] = 0.0;
 
-		  IndexCounter++;
-		}
-  // 	    }
+	      Indices[IndexCounter] = kk + 2 * Vel_Nnm;
+
+	      IndexCounter++;
+// 		}
 	    } // pre k
 
 	    Error = A.InsertGlobalValues(ii + Vel_Nnm, IndexCounter, Values, Indices);
 	    
-	    if(Error != 0)
-	    {
-	      std::cout << "InitMat Zero Broke 3" << endl;
-	      std::cout << "myid =" << myid << endl;
-	      std::cout << "ii = " << ii << endl;
-	      std::cout << "jj = " << jj << endl;
-	      std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
-	      Error = 0;
-	    }
+// 	    if(Error != 0)
+// 	    {
+// 	      std::cout << "InitMat Zero Broke 3" << endl;
+// 	      std::cout << "myid =" << myid << endl;
+// 	      std::cout << "ii = " << ii << endl;
+// 	      std::cout << "jj = " << jj << endl;
+// 	      std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
+// 	      Error = 0;
+// 	    }
 	  } // if ii != 1
-	  else // if(Vel_Nod_BC_Ver(Ne,i) == 1 && All_Proc_Nodes_VP(ii + Vel_Nnm) == myid) // Essential BC on this row
+	  else // Essential BC on this row
 	  {
 
-	    Values[0] = 0.0;
+	    Values[0] = 1.0;
 
 	    Indices[0] = ii + Vel_Nnm;
 	    
@@ -246,15 +262,15 @@ void InitMatZero(int Vel_Npe,
 	    
 	    Error = A.InsertGlobalValues(ii + Vel_Nnm, IndexCounter, Values, Indices);
 	    
-	    if(Error != 0)
-	    {
-	      std::cout << "InitMat Zero Broke 4" << endl;
-	      std::cout << "myid =" << myid << endl;
-	      std::cout << "ii = " << ii << endl;
-	      std::cout << "jj = " << jj << endl;
-	      std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
-	      Error = 0;
-	    }
+// 	    if(Error != 0)
+// 	    {
+// 	      std::cout << "InitMat Zero Broke 4" << endl;
+// 	      std::cout << "myid =" << myid << endl;
+// 	      std::cout << "ii = " << ii << endl;
+// 	      std::cout << "jj = " << jj << endl;
+// 	      std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
+// 	      Error = 0;
+// 	    }
 	  } // if ii for ii = 1
 	}
       } // vel i, part 2
@@ -268,7 +284,8 @@ void InitMatZero(int Vel_Npe,
 
 	if(All_Proc_Nodes_VP(kk + 2 * Vel_Nnm) == myid)
 	{
-	  // Pressure BCs are disabled
+	  // Pressure BCs are disabled because specifiying a pressure essential BC
+	  // over-determines the system of equations that I am solving
 // 	  if(Pre_Nod_BC(Ne,k) != 1)
 // 	  {
 	  // VEL COLUMNS
@@ -277,15 +294,25 @@ void InitMatZero(int Vel_Npe,
 	    
 	    jj = Vel_Nod(Ne,j) - 1;
 	    
+	    if(Vel_Nod_BC_Hor(Ne,j) != 1)// && Vel_Nod_BC_Hor(Ne,j) != 2)
+	    {  
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // !!!!!!!!!!!!!!!!!!!!!!!!!!! B1 Trans !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	    if(Vel_Nod_BC_Hor(Ne,j) != 1) // && All_Proc_Nodes_VP(jj) == myid)
-	    {  
+	    // The horizontal velocity contribution to the pressure
 	      P_Values[IndexCounter] = 0.0;
 
 	      P_Indices[IndexCounter] = jj;
+	      
+	      IndexCounter++;
+	      
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!! B2 Trans !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	    // The vertical velocity contribution to the pressure
+	      P_Values[IndexCounter] = 0.0;
+
+	      P_Indices[IndexCounter] = jj + Vel_Nnm;
 	      
 	      IndexCounter++;
 	    }
@@ -293,28 +320,28 @@ void InitMatZero(int Vel_Npe,
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // !!!!!!!!!!!!!!!!!!!!!!!!!!! B2 Trans !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	    if(Vel_Nod_BC_Ver(Ne,j) != 1) // && All_Proc_Nodes_VP(jj + Vel_Nnm) == myid)
-	    {
-	      P_Values[IndexCounter] = 0.0;
-
-	      P_Indices[IndexCounter] = jj + Vel_Nnm;
-	      
-	      IndexCounter++;
-	    }
+	    // The vertical velocity contribution to the pressure
+// 	    if(Vel_Nod_BC_Ver(Ne,j) != 1)
+// 	    {
+// 	      P_Values[IndexCounter] = 0.0;
+// 
+// 	      P_Indices[IndexCounter] = jj + Vel_Nnm;
+// 	      
+// 	      IndexCounter++;
+// 	    }
 	  } // for j
 	  
 	  Error = A.InsertGlobalValues(kk + 2 * Vel_Nnm, IndexCounter, P_Values, P_Indices);
 	  
-	  if(Error != 0)
-	  {
-	    std::cout << "InitMat Zero Broke 5" << endl;
-	    std::cout << "myid =" << myid << endl;
-	    std::cout << "ii = " << ii << endl;
-	    std::cout << "jj = " << jj << endl;
-	    std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
-	    Error = 0;
-	  }
+// 	  if(Error != 0)
+// 	  {
+// 	    std::cout << "InitMat Zero Broke 5" << endl;
+// 	    std::cout << "myid =" << myid << endl;
+// 	    std::cout << "ii = " << ii << endl;
+// 	    std::cout << "jj = " << jj << endl;
+// 	    std::cout << "All_Proc_Nodes_VP(jj) = " << All_Proc_Nodes_VP(jj) << endl;
+// 	    Error = 0;
+// 	  }
 // 	  }
 	  // kk will never equal jj.  This BC condition only happens twice
 // 	  else // if(Pre_Nod_BC(Ne,k) == 1 && All_Proc_Nodes_VP(kk + 2 * Vel_Nnm) == myid)
@@ -347,7 +374,7 @@ void InitMatZero(int Vel_Npe,
 //   
 //   IndexCounter = 1;
 //   
-//   for(int i = 1; i < Pre_Nnm; i++)// Starts at 1 because i = 0 is taken care of above
+//   for(int i = 0; i < Pre_Nnm; i++)
 //   {
 //     if(All_Proc_Nodes_VP(i + 2 * Vel_Nnm) == myid)
 //     {
@@ -355,11 +382,11 @@ void InitMatZero(int Vel_Npe,
 // 
 //       Error = A.InsertGlobalValues(i + 2 * Vel_Nnm, IndexCounter, P_Values, P_Indices);
 //       
-//       if(Error != 0)
-//       {
-// 	std::cout << "InitMat Zero Broke 7" << endl;
-// 	Error = 0;
-//       }
+// //       if(Error != 0)
+// //       {
+// // 	std::cout << "InitMat Zero Broke 7" << endl;
+// // 	Error = 0;
+// //       }
 //     }
 //   }
 

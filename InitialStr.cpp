@@ -1,5 +1,5 @@
 // Viscosity * 0.5 * (Gradu + GraduTrans)
-// The other values not discribed here are initialized to zero.
+// The other values not described here are initialized to zero.
 // While Str is symmetric all code takes advatage of this property so it isn't necesary to actually code
 // more than one term since the main diagonal of the stress tensor is initiially zero.
 

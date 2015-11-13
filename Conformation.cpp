@@ -343,7 +343,7 @@ void Conformation(double TIMESTEP,
   
   // Bio variables
   E_SDV El_Bio;
-  double GaussPt_Bio;
+  double NodeBio;
   
   // Other variables
   E_SDM Gdsf, TempMat1, TempMat2, TempMat3, TempMat4, Dep_Gdsf;
@@ -352,7 +352,7 @@ void Conformation(double TIMESTEP,
   double Xi, Eta, Coeff, Det_Grad_Vel, Trace_Grad_Vel;
   double alpha1, alpha2, alpha3, x, y, x1, x2, x3, y1, y2, y3, Two_Area, DetJ;
   double RetardDivRelax, U_Zero, Effective_Pol_Vis, Effective_Den, ALPHA, BETA, P_Zero, Wi;
-  double GaussPt_Bio_Weight, Effective_Vis;
+  double NodeBio_Weight, Effective_Vis;
   
   // Initialize
   // Velocity terms
@@ -477,27 +477,28 @@ void Conformation(double TIMESTEP,
 
 	El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
 
-	GaussPt_Bio = 0.0;
+	NodeBio = 0.0;
 	
 	for(int k = 0; k <= Vel_Npe - 1; k++)
 	{
-	  GaussPt_Bio += El_Bio(k) * Sf(k);
+	  NodeBio += El_Bio(k) * Sf(k);
 	}
 	
-	GaussPt_Bio_Weight = BioWeightFunc(GaussPt_Bio);
+	NodeBio_Weight = BioWeightFunc(NodeBio);
 	
-	RetardDivRelax = RetardationDividedByRelaxation(GaussPt_Bio_Weight);
+	RetardDivRelax = RetardationDividedByRelaxation(NodeBio_Weight);
 
-	Effective_Den = (1 - GaussPt_Bio_Weight) * Sol_Density + GaussPt_Bio_Weight * Poly_Density;
+	Effective_Den = (1 - NodeBio_Weight) * Sol_Density + NodeBio_Weight * Poly_Density;
 	
 	P_Zero = Effective_Den * U_Zero * U_Zero;
 	
-	Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
+	Effective_Vis = (Sol_Vis * (1 - NodeBio_Weight) + Poly_Vis * NodeBio_Weight) / (T_ZERO * P_Zero);
 	
 	Effective_Pol_Vis = (1 - RetardDivRelax) * Effective_Vis;
 	
-	Wi = RETARD_TIME / RetardDivRelax; // RETARD_TIME / RetardDivRelax = RELAX_TIME
+	Wi = RETARD_TIME / RetardDivRelax * U_Zero / L_ZERO; // RETARD_TIME / RetardDivRelax = RELAX_TIME
 	
+	// Below Eq. 3.5 pg 380 Dr. Lee's work
 	ALPHA = 1.0 / Wi;
 	
 	BETA = Effective_Pol_Vis * ALPHA * ALPHA;
@@ -663,26 +664,26 @@ void Conformation(double TIMESTEP,
 
 	El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
 
-	GaussPt_Bio = 0.0;
+	NodeBio = 0.0;
 	
 	for(int k = 0; k <= Vel_Npe - 1; k++)
 	{
-	  GaussPt_Bio += El_Bio(k) * Sf(k);
+	  NodeBio += El_Bio(k) * Sf(k);
 	}
 	
-	GaussPt_Bio_Weight = BioWeightFunc(GaussPt_Bio);
+	NodeBio_Weight = BioWeightFunc(NodeBio);
 	
-	RetardDivRelax = RetardationDividedByRelaxation(GaussPt_Bio_Weight);
+	RetardDivRelax = RetardationDividedByRelaxation(NodeBio_Weight);
 
-	Effective_Den = (1 - GaussPt_Bio_Weight) * Sol_Density + GaussPt_Bio_Weight * Poly_Density;
+	Effective_Den = (1 - NodeBio_Weight) * Sol_Density + NodeBio_Weight * Poly_Density;
 	
 	P_Zero = Effective_Den * U_Zero * U_Zero;
 	
-	Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
+	Effective_Vis = (Sol_Vis * (1 - NodeBio_Weight) + Poly_Vis * NodeBio_Weight) / (T_ZERO * P_Zero);
 	
 	Effective_Pol_Vis = (1 - RetardDivRelax) * Effective_Vis;
 	
-	Wi = RETARD_TIME / RetardDivRelax; // RETARD_TIME / RetardDivRelax = RELAX_TIME
+	Wi = RETARD_TIME / RetardDivRelax * U_Zero / L_ZERO; // RETARD_TIME / RetardDivRelax = RELAX_TIME
 	
 	ALPHA = 1.0 / Wi;
 	
@@ -861,26 +862,26 @@ void Conformation(double TIMESTEP,
 
       El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
 
-      GaussPt_Bio = 0.0;
+      NodeBio = 0.0;
 	
       for(int k = 0; k <= Vel_Npe - 1; k++)
       {
-	GaussPt_Bio += El_Bio(k) * Sf(k);
+	NodeBio += El_Bio(k) * Sf(k);
       }
       
-      GaussPt_Bio_Weight = BioWeightFunc(GaussPt_Bio);
+      NodeBio_Weight = BioWeightFunc(NodeBio);
       
-      RetardDivRelax = RetardationDividedByRelaxation(GaussPt_Bio_Weight);
+      RetardDivRelax = RetardationDividedByRelaxation(NodeBio_Weight);
 
-      Effective_Den = (1 - GaussPt_Bio_Weight) * Sol_Density + GaussPt_Bio_Weight * Poly_Density;
+      Effective_Den = (1 - NodeBio_Weight) * Sol_Density + NodeBio_Weight * Poly_Density;
       
       P_Zero = Effective_Den * U_Zero * U_Zero;
       
-      Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
+      Effective_Vis = (Sol_Vis * (1 - NodeBio_Weight) + Poly_Vis * NodeBio_Weight) / (T_ZERO * P_Zero);
       
       Effective_Pol_Vis = (1 - RetardDivRelax) * Effective_Vis;
       
-      Wi = RETARD_TIME / RetardDivRelax; // RETARD_TIME / RetardDivRelax = RELAX_TIME
+      Wi = RETARD_TIME / RetardDivRelax * U_Zero / L_ZERO; // RETARD_TIME / RetardDivRelax = RELAX_TIME
       
       ALPHA = 1.0 / Wi;
       
@@ -978,189 +979,189 @@ void Conformation(double TIMESTEP,
       Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
       Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
       
-      if(STRESS_FLAG == 2)
+//       if(STRESS_FLAG == 2)
+//       {
+      for(int j = 4; j <= 5; j++)
       {
-	for(int j = 4; j <= 5; j++)
+	Vel_Inod = Vel_Nod(Ne,j) - 1;
+
+	alpha1 = Vel_Elxy(1,0) * Vel_Elxy(2,1) - Vel_Elxy(2,0) * Vel_Elxy(1,1); // x2 * y3 - x3 * y2
+	alpha2 = Vel_Elxy(2,0) * Vel_Elxy(0,1) - Vel_Elxy(0,0) * Vel_Elxy(2,1); // x3 * y1 - x1 * y3
+	alpha3 = Vel_Elxy(0,0) * Vel_Elxy(1,1) - Vel_Elxy(1,0) * Vel_Elxy(0,1); // x1 * y2 - x2 * y1
+	
+	// In general: 2 * Area = x2 * y3 - x3 * y2 + x3 * y1 - x1 * y3 + x1 * y2 - x2 * y1
+	Two_Area = alpha1 + alpha2 + alpha3;
+	x = Vel_Glxy(Vel_Inod, 0);
+	y = Vel_Glxy(Vel_Inod, 1);
+	
+	// Only the vertices of each element are used here
+	x1 = Vel_Elxy(0,0);
+	x2 = Vel_Elxy(1,0);
+	x3 = Vel_Elxy(2,0);
+	y1 = Vel_Elxy(0,1);
+	y2 = Vel_Elxy(1,1);
+	y3 = Vel_Elxy(2,1);
+	
+	Xi  = 1.0 / Two_Area * ((x - x3) * (y2 - y3) - (y - y3) * (x2 - x3));
+	Eta = 1.0 / Two_Area * ((x - x1) * (y3 - y1) + (y - y1) * (x1 - x3));
+
+	Shape2d(Xi, 
+		Eta, 
+		Vel_Elxy, 
+		Vel_Npe, 
+		VEL_FLAG, 
+		Sf, 
+		Vel_Gdsf, 
+		DetJ);
+
+	Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
+
+	// Compute the stress at the departure foot
+	for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
 	{
-	  Vel_Inod = Vel_Nod(Ne,j) - 1;
+	  Inod = Str_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
+	  Str_Elxy(i,0) = Str_Glxy(Inod,0);	// x-coordinate
+	  Str_Elxy(i,1) = Str_Glxy(Inod,1);	// y-coordinate
 
-	  alpha1 = Vel_Elxy(1,0) * Vel_Elxy(2,1) - Vel_Elxy(2,0) * Vel_Elxy(1,1); // x2 * y3 - x3 * y2
-	  alpha2 = Vel_Elxy(2,0) * Vel_Elxy(0,1) - Vel_Elxy(0,0) * Vel_Elxy(2,1); // x3 * y1 - x1 * y3
-	  alpha3 = Vel_Elxy(0,0) * Vel_Elxy(1,1) - Vel_Elxy(1,0) * Vel_Elxy(0,1); // x1 * y2 - x2 * y1
-	  
-	  // In general: 2 * Area = x2 * y3 - x3 * y2 + x3 * y1 - x1 * y3 + x1 * y2 - x2 * y1
-	  Two_Area = alpha1 + alpha2 + alpha3;
-	  x = Vel_Glxy(Vel_Inod, 0);
-	  y = Vel_Glxy(Vel_Inod, 1);
-	  
-	  // Only the vertices of each element are used here
-	  x1 = Vel_Elxy(0,0);
-	  x2 = Vel_Elxy(1,0);
-	  x3 = Vel_Elxy(2,0);
-	  y1 = Vel_Elxy(0,1);
-	  y2 = Vel_Elxy(1,1);
-	  y3 = Vel_Elxy(2,1);
-	  
-	  Xi  = 1.0 / Two_Area * ((x - x3) * (y2 - y3) - (y - y3) * (x2 - x3));
-	  Eta = 1.0 / Two_Area * ((x - x1) * (y3 - y1) + (y - y1) * (x1 - x3));
-
-	  Shape2d(Xi, 
-		  Eta, 
-		  Vel_Elxy, 
-		  Vel_Npe, 
-		  VEL_FLAG, 
-		  Sf, 
-		  Vel_Gdsf, 
-		  DetJ);
-
-	  Cur_Ele = StrNodeDepartElement(Ne, j); // New_Ele; //Ne + 1;
-
-	  // Compute the stress at the departure foot
-	  for (int i = 0; i <= Str_Npe - 1; i++) 	// get global coordinates of local nodes of element NE
-	  {
-	    Inod = Str_Nod(Cur_Ele-1,i) - 1;	// Global node number (minus one for C++ indexing) of local node.
-	    Str_Elxy(i,0) = Str_Glxy(Inod,0);	// x-coordinate
-	    Str_Elxy(i,1) = Str_Glxy(Inod,1);	// y-coordinate
-
-	    El_Str(0,i) = Str_Old(Inod,0);
-	    El_Str(1,i) = Str_Old(Inod,1);
-	    El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
-	    El_Str(3,i) = Str_Old(Inod,2);
-	  }
+	  El_Str(0,i) = Str_Old(Inod,0);
+	  El_Str(1,i) = Str_Old(Inod,1);
+	  El_Str(2,i) = El_Str(1,i); // The stress tensor is symmetric
+	  El_Str(3,i) = Str_Old(Inod,2);
+	}
 
 // 	  The point may have not left the element but it did move so recompute everything at the new position
-	  Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
-	  Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
+	Xi = StrNodeDepartFootx(Ne, j); // Y_New_Xi_Eta(0); //
+	Eta = StrNodeDepartFooty(Ne, j); // Y_New_Xi_Eta(1); //
 
-	  Shape2d(Xi, 
-		  Eta, 
-		  Str_Elxy, 
-		  Str_Npe, 	// Both stress and pressure are linear
-		  STRESS_FLAG, 
-		  Dep_Sf, 	// output
-		  Dep_Gdsf, // output
-		  DetJ);	// output
+	Shape2d(Xi, 
+		Eta, 
+		Str_Elxy, 
+		Str_Npe, 	// Both stress and pressure are linear
+		STRESS_FLAG, 
+		Dep_Sf, 	// output
+		Dep_Gdsf, // output
+		DetJ);	// output
 
-	  El_Dep_Str(0,0) = 0.0;
-	  El_Dep_Str(0,1) = 0.0;
-	  El_Dep_Str(1,1) = 0.0;
-	  
-	  for(int k = 0; k <= Str_Npe - 1; k++)
-	  {
-	    El_Dep_Str(0,0) += El_Str(0,k) * Dep_Sf(k);
-	    El_Dep_Str(0,1) += El_Str(1,k) * Dep_Sf(k);
-	    El_Dep_Str(1,1) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
-	  }
-
-	  El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
-
-	  GaussPt_Bio = 0.0;
-	  
-	  for(int k = 0; k <= Vel_Npe - 1; k++)
-	  {
-	    GaussPt_Bio += El_Bio(k) * Sf(k);
-	  }
-	  
-	  GaussPt_Bio_Weight = BioWeightFunc(GaussPt_Bio);
-	  
-	  RetardDivRelax = RetardationDividedByRelaxation(GaussPt_Bio_Weight);
-
-	  Effective_Den = (1 - GaussPt_Bio_Weight) * Sol_Density + GaussPt_Bio_Weight * Poly_Density;
-	  
-	  P_Zero = Effective_Den * U_Zero * U_Zero;
-	  
-	  Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
-	  
-	  Effective_Pol_Vis = (1 - RetardDivRelax) * Effective_Vis;
-	  
-	  Wi = RETARD_TIME / RetardDivRelax; // RETARD_TIME / RetardDivRelax = RELAX_TIME
-	  
-	  ALPHA = 1.0 / Wi;
-	  
-	  BETA = Effective_Pol_Vis * ALPHA * ALPHA;
-
-	  // zeros out Grad_Vel
-	  for(int i = 0; i <= 1; i++)
-	  {
-	    for(int k = 0; k <= 1; k++)
-	    {
-	      Grad_Vel(i,k) = 0.0;
-	    }
-	  }
-	  
-	  // Computes Grad_Vel = El_Vel * Vel_Gdsf' (matlab's transpose notation)
-	  for(int i = 0; i <= 1; i++)
-	  {
-	    for(int l = 0; l <= 1; l++)
-	    {
-	      for(int k = 0; k <= Vel_Npe-1; k++)
-	      {
-		Grad_Vel(i,l) += El_Vel(i,k) * Vel_Gdsf(l,k); // Gdsf transpose
-	      }
-	    }
-	  }
-
-	  // The invere of gradu times its determinant
-	  Det_Inv_Grad_Vel(0,0) = Grad_Vel(1,1);
-	  Det_Inv_Grad_Vel(0,1) = -Grad_Vel(0,1);
-	  Det_Inv_Grad_Vel(1,0) = -Grad_Vel(1,0);
-	  Det_Inv_Grad_Vel(1,1) = Grad_Vel(0,0);
-	  
-	  Det_Grad_Vel = Grad_Vel(0,0) * Grad_Vel(1,1) - Grad_Vel(0,1) * Grad_Vel(1,0);
-	  
-	  Trace_Grad_Vel = Grad_Vel(0,0) + Grad_Vel(1,1);
-
-	  Coeff = 1 - TIMESTEP * Trace_Grad_Vel + TIMESTEP * TIMESTEP * Det_Grad_Vel;
-	  
-	  // (I - k * det(gradu)*(gradu Inv)) transpose
-	  TempMat1(0,0) = 1 - TIMESTEP * Det_Inv_Grad_Vel(0,0);
-	  TempMat1(1,0) = - TIMESTEP * Det_Inv_Grad_Vel(0,1); // Note transpose is here
-	  TempMat1(0,1) = - TIMESTEP * Det_Inv_Grad_Vel(1,0); // and here (1,0) to (0,1), etc.
-	  TempMat1(1,1) = 1 - TIMESTEP * Det_Inv_Grad_Vel(1,1);
-	  
-	  // I - k * det(gradu)*(gradu Inv)
-	  TempMat2(0,0) = 1 - TIMESTEP * Det_Inv_Grad_Vel(0,0);
-	  TempMat2(0,1) = - TIMESTEP * Det_Inv_Grad_Vel(0,1);
-	  TempMat2(1,0) = - TIMESTEP * Det_Inv_Grad_Vel(1,0);
-	  TempMat2(1,1) = 1 - TIMESTEP * Det_Inv_Grad_Vel(1,1);
-	  
-	  for(int i = 0; i <= 1; i++)
-	  {
-	    for(int k = 0; k <= 1; k++)
-	    {
-	      TempMat3(i,k) = 0.0;
-	      TempMat4(i,k) = 0.0;
-	    }
-	  }
-	  
-	  for(int i = 0; i <= 1; i++)
-	  {
-	    for(int l = 0; l <= 1; l++)
-	    {
-	      for(int k = 0; k <= 1; k++)
-	      {
-		TempMat3(i,l) += TempMat2(i,k) * El_Dep_Str(k,l);
-	      }
-	    }
-	  }
-
-	  for(int i = 0; i <= 1; i++)
-	  {
-	    for(int l = 0; l <= 1; l++)
-	    {
-	      for(int k = 0; k <= 1; k++)
-	      {
-		TempMat4(i,l) += 1.0/(Coeff * Coeff) * TempMat3(i,k) * TempMat1(k,l);
-	      }
-	    }
-	  }
-
-	  Inod = Str_Nod(Ne,j) - 1;
-	  
-	  Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
-	  Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
-	  Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+	El_Dep_Str(0,0) = 0.0;
+	El_Dep_Str(0,1) = 0.0;
+	El_Dep_Str(1,1) = 0.0;
+	
+	for(int k = 0; k <= Str_Npe - 1; k++)
+	{
+	  El_Dep_Str(0,0) += El_Str(0,k) * Dep_Sf(k);
+	  El_Dep_Str(0,1) += El_Str(1,k) * Dep_Sf(k);
+	  El_Dep_Str(1,1) += El_Str(3,k) * Dep_Sf(k); // Since the Str is symmetric
 	}
+
+	El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
+
+	NodeBio = 0.0;
+	
+	for(int k = 0; k <= Vel_Npe - 1; k++)
+	{
+	  NodeBio += El_Bio(k) * Sf(k);
+	}
+	
+	NodeBio_Weight = BioWeightFunc(NodeBio);
+	
+	RetardDivRelax = RetardationDividedByRelaxation(NodeBio_Weight);
+
+	Effective_Den = (1 - NodeBio_Weight) * Sol_Density + NodeBio_Weight * Poly_Density;
+	
+	P_Zero = Effective_Den * U_Zero * U_Zero;
+	
+	Effective_Vis = (Sol_Vis * (1 - NodeBio_Weight) + Poly_Vis * NodeBio_Weight) / (T_ZERO * P_Zero);
+	
+	Effective_Pol_Vis = (1 - RetardDivRelax) * Effective_Vis;
+	
+	Wi = RETARD_TIME / RetardDivRelax * U_Zero / L_ZERO; // RETARD_TIME / RetardDivRelax = RELAX_TIME
+	
+	ALPHA = 1.0 / Wi;
+	
+	BETA = Effective_Pol_Vis * ALPHA * ALPHA;
+
+	// zeros out Grad_Vel
+	for(int i = 0; i <= 1; i++)
+	{
+	  for(int k = 0; k <= 1; k++)
+	  {
+	    Grad_Vel(i,k) = 0.0;
+	  }
+	}
+	
+	// Computes Grad_Vel = El_Vel * Vel_Gdsf' (matlab's transpose notation)
+	for(int i = 0; i <= 1; i++)
+	{
+	  for(int l = 0; l <= 1; l++)
+	  {
+	    for(int k = 0; k <= Vel_Npe-1; k++)
+	    {
+	      Grad_Vel(i,l) += El_Vel(i,k) * Vel_Gdsf(l,k); // Gdsf transpose
+	    }
+	  }
+	}
+
+	// The invere of gradu times its determinant
+	Det_Inv_Grad_Vel(0,0) = Grad_Vel(1,1);
+	Det_Inv_Grad_Vel(0,1) = -Grad_Vel(0,1);
+	Det_Inv_Grad_Vel(1,0) = -Grad_Vel(1,0);
+	Det_Inv_Grad_Vel(1,1) = Grad_Vel(0,0);
+	
+	Det_Grad_Vel = Grad_Vel(0,0) * Grad_Vel(1,1) - Grad_Vel(0,1) * Grad_Vel(1,0);
+	
+	Trace_Grad_Vel = Grad_Vel(0,0) + Grad_Vel(1,1);
+
+	Coeff = 1 - TIMESTEP * Trace_Grad_Vel + TIMESTEP * TIMESTEP * Det_Grad_Vel;
+	
+	// (I - k * det(gradu)*(gradu Inv)) transpose
+	TempMat1(0,0) = 1 - TIMESTEP * Det_Inv_Grad_Vel(0,0);
+	TempMat1(1,0) = - TIMESTEP * Det_Inv_Grad_Vel(0,1); // Note transpose is here
+	TempMat1(0,1) = - TIMESTEP * Det_Inv_Grad_Vel(1,0); // and here (1,0) to (0,1), etc.
+	TempMat1(1,1) = 1 - TIMESTEP * Det_Inv_Grad_Vel(1,1);
+	
+	// I - k * det(gradu)*(gradu Inv)
+	TempMat2(0,0) = 1 - TIMESTEP * Det_Inv_Grad_Vel(0,0);
+	TempMat2(0,1) = - TIMESTEP * Det_Inv_Grad_Vel(0,1);
+	TempMat2(1,0) = - TIMESTEP * Det_Inv_Grad_Vel(1,0);
+	TempMat2(1,1) = 1 - TIMESTEP * Det_Inv_Grad_Vel(1,1);
+	
+	for(int i = 0; i <= 1; i++)
+	{
+	  for(int k = 0; k <= 1; k++)
+	  {
+	    TempMat3(i,k) = 0.0;
+	    TempMat4(i,k) = 0.0;
+	  }
+	}
+	
+	for(int i = 0; i <= 1; i++)
+	{
+	  for(int l = 0; l <= 1; l++)
+	  {
+	    for(int k = 0; k <= 1; k++)
+	    {
+	      TempMat3(i,l) += TempMat2(i,k) * El_Dep_Str(k,l);
+	    }
+	  }
+	}
+
+	for(int i = 0; i <= 1; i++)
+	{
+	  for(int l = 0; l <= 1; l++)
+	  {
+	    for(int k = 0; k <= 1; k++)
+	    {
+	      TempMat4(i,l) += 1.0/(Coeff * Coeff) * TempMat3(i,k) * TempMat1(k,l);
+	    }
+	  }
+	}
+
+	Inod = Str_Nod(Ne,j) - 1;
+	
+	Str_New(Inod, 0) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(0,0) + TIMESTEP * BETA);
+	Str_New(Inod, 1) = 1.0 / (1.0 + TIMESTEP * ALPHA) * TempMat4(0,1);
+	Str_New(Inod, 2) = 1.0 / (1.0 + TIMESTEP * ALPHA) * (TempMat4(1,1) + TIMESTEP * BETA);
+// 	}
       }
     }
     // If NX is not the first element in a row but is even
@@ -1241,26 +1242,26 @@ void Conformation(double TIMESTEP,
 
       El_Dep_Str(1,0) = El_Dep_Str(0,1); // The stress tensor is symmetric
 
-      GaussPt_Bio = 0.0;
+      NodeBio = 0.0;
 	
       for(int k = 0; k <= Vel_Npe - 1; k++)
       {
-	GaussPt_Bio += El_Bio(k) * Sf(k);
+	NodeBio += El_Bio(k) * Sf(k);
       }
       
-      GaussPt_Bio_Weight = BioWeightFunc(GaussPt_Bio);
+      NodeBio_Weight = BioWeightFunc(NodeBio);
       
-      RetardDivRelax = RetardationDividedByRelaxation(GaussPt_Bio_Weight);
+      RetardDivRelax = RetardationDividedByRelaxation(NodeBio_Weight);
 
-      Effective_Den = (1 - GaussPt_Bio_Weight) * Sol_Density + GaussPt_Bio_Weight * Poly_Density;
+      Effective_Den = (1 - NodeBio_Weight) * Sol_Density + NodeBio_Weight * Poly_Density;
       
       P_Zero = Effective_Den * U_Zero * U_Zero;
       
-      Effective_Vis = (Sol_Vis * (1 - GaussPt_Bio_Weight) + Poly_Vis * GaussPt_Bio_Weight) / (T_ZERO * P_Zero);
+      Effective_Vis = (Sol_Vis * (1 - NodeBio_Weight) + Poly_Vis * NodeBio_Weight) / (T_ZERO * P_Zero);
       
       Effective_Pol_Vis = (1 - RetardDivRelax) * Effective_Vis;
       
-      Wi = RETARD_TIME / RetardDivRelax; // RETARD_TIME / RetardDivRelax = RELAX_TIME
+      Wi = RETARD_TIME / RetardDivRelax * U_Zero / L_ZERO; // RETARD_TIME / RetardDivRelax = RELAX_TIME
       
       ALPHA = 1.0 / Wi;
       

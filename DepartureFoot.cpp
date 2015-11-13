@@ -31,7 +31,11 @@ void DepartureFoot(int Vel_Flag,
   int Inod, Cur_Ele, Old_Ele, Ele_Flag;
   double Xi, Eta, DetJ, Coeff, Feet_Tol, TOL = 0.00001; // Same tolerance as in main
   double alpha1, alpha2, alpha3, x, y, x1, x2, x3, y1, y2, y3, Two_Area;
-  double xDbl, yDbl;
+  double xDbl, yDbl, a, b;
+  
+  // Feet Search Variables
+  int xInt, yInt;
+  double slope; //xRemainder, yRemainder, 
   
   // Initialize
   // Velocity terms
@@ -52,10 +56,6 @@ void DepartureFoot(int Vel_Flag,
   TempMat.Shape(2,2);
   TempVec.Size(2);
 
-  // Feet Search Variables
-  int xInt, yInt;
-  double slope; //xRemainder, yRemainder, 
-  
   // Initialize the while loop
   // Element velocity info
   for (int i = 0; i <= Vel_Npe-1; i++) 	// get global coordinates of local nodes of element NE
@@ -74,7 +74,7 @@ void DepartureFoot(int Vel_Flag,
   
   Two_Area = alpha1 + alpha2 + alpha3;
   
-  //Initial position and constant throughout this subroutine
+  //Initial position is a Guass point and is constant throughout this subroutine
   x = Ini_Foot(0);
   y = Ini_Foot(1);
   
@@ -107,16 +107,16 @@ void DepartureFoot(int Vel_Flag,
 	  DetJ);	// output
 
   // Zero out data structures for use of += later.
-  for(int i = 0; i <= 1; i++)
-  {
-    for(int j = 0; j <= 1; j++)
-    {
-      Grad_Vel(i,j) = 0.0;
-    }
-    It_Vel(i) = 0.0;
-  }
+//   for(int i = 0; i <= 1; i++)
+//   {
+//     for(int j = 0; j <= 1; j++)
+//     {
+//       Grad_Vel(i,j) = 0.0;
+//     }
+//     It_Vel(i) = 0.0;
+//   }
   
-  // Grad_Vel = El_Vel * Gdsf' (transpose)
+  // Grad_Vel = El_Vel * GdsfTrans (gradient of the shape functions transpose)
   for(int i = 0; i <= 1; i++)
   {
     for(int j = 0; j <= 1; j++)
@@ -128,24 +128,23 @@ void DepartureFoot(int Vel_Flag,
     }
   }
   
-  // Iteratived velocity It_Vel = El_Vel * Sf
+  // Iterated velocity It_Vel = El_Vel * Sf at the "new" point
   for(int j = 0; j <= Vel_Npe - 1; j++)
   {
     It_Vel(0) += El_Vel(0,j) * Sf(j);
     It_Vel(1) += El_Vel(1,j) * Sf(j);
   }
 
+  // Different initial guess
 //   Y_Old(0) = x - TIMESTEP * It_Vel(0); // Initial Guess is at X
 //   Y_Old(1) = y - TIMESTEP * It_Vel(1);
-  
+
+  // Determinant of Gradient of "G" inverse which is det(inv(I+k/2*Gradu))
   Det_Grad_Vel = Grad_Vel(0,0)*Grad_Vel(1,1) - Grad_Vel(0,1)*Grad_Vel(1,0);
-
   Trace_Grad_Vel = Grad_Vel(0,0) + Grad_Vel(1,1);
-
-  // det(Inv_Grad_Vel)
   Coeff = 1.0 + TIMESTEP / 2.0 * Trace_Grad_Vel + TIMESTEP * TIMESTEP / 4.0 * Det_Grad_Vel;
 
-  // The invere of gradu times it's determinant
+  // The inverse of gradu times it's determinant
   Det_Inv_Grad_Vel(0,0) = Grad_Vel(1,1);
   Det_Inv_Grad_Vel(0,1) = -Grad_Vel(0,1);
   Det_Inv_Grad_Vel(1,0) = -Grad_Vel(1,0);
@@ -153,8 +152,8 @@ void DepartureFoot(int Vel_Flag,
 
   // Computing I - k/2 * det(gradu)*(gradu Inv)
   TempMat(0,0) = 1.0 + TIMESTEP / 2.0 * Det_Inv_Grad_Vel(0,0);
-  TempMat(0,1) = -TIMESTEP / 2.0 * Det_Inv_Grad_Vel(0,1);
-  TempMat(1,0) = -TIMESTEP / 2.0 * Det_Inv_Grad_Vel(1,0);
+  TempMat(0,1) = TIMESTEP / 2.0 * Det_Inv_Grad_Vel(0,1);
+  TempMat(1,0) = TIMESTEP / 2.0 * Det_Inv_Grad_Vel(1,0);
   TempMat(1,1) = 1.0 + TIMESTEP / 2.0 * Det_Inv_Grad_Vel(1,1);
 
   // computing yn + k * u((yn + x)/2) - x
@@ -167,9 +166,7 @@ void DepartureFoot(int Vel_Flag,
   // Returns the departure foot to the domain
   if(Y_New(0) < 0)
   {
-    
-//     std::cout << "Y_New(0) = " << Y_New(0) << endl;
-    
+
     Y_New(0) = 0;
   }
   
@@ -201,54 +198,47 @@ void DepartureFoot(int Vel_Flag,
   New_Ele = -1;
   Ele_Flag = 1;
 
-//       int Count = 1;
-  
-//   std::cout << "Before Depart_Foot while loop" << endl;
-  
   int count = 0;
   int QWERTY;
   
   // Do not enter the while loop if already converged
   while (Feet_Tol > TOL)// && counter <= 10) // converges in at most 5 steps
   {
-    
-    count++;
-    
+
     if(count >= 10) {
       
-//       std::cout << "Cur_Ele = " << Cur_Ele << endl;
-//       std::cout << "New_Ele = " << New_Ele << endl;
-//       std::cout << "Old_Ele = " << Old_Ele << endl;
-//       std::cout << "Count = " << count << endl;
-//       
-//       std::cout << "Y_Old(0) = " << Y_Old(0) << endl;
-//       std::cout << "Y_Old(1) = " << Y_Old(1) << endl;
-//       std::cout << "Y_New(0) = " << Y_New(0) << endl;
-//       std::cout << "Y_New(1) = " << Y_New(1) << endl;
-//       std::cout << "xInt = " << xInt << endl;
-//       std::cout << "yInt = " << yInt << endl;
+      std::cout << "Cur_Ele = " << Cur_Ele << endl;
+      std::cout << "New_Ele = " << New_Ele << endl;
+      std::cout << "Old_Ele = " << Old_Ele << endl;
+      std::cout << "Count = " << count << endl;
       
-//       std::cin >> QWERTY;
+      std::cout << "Y_Old(0) = " << Y_Old(0) << endl;
+      std::cout << "Y_Old(1) = " << Y_Old(1) << endl;
+      std::cout << "Y_New(0) = " << Y_New(0) << endl;
+      std::cout << "Y_New(1) = " << Y_New(1) << endl;
+      std::cout << "xInt = " << xInt << endl;
+      std::cout << "yInt = " << yInt << endl;
       
-      // Computer Stress at original point
-      
-      // Compute Stress at Old point
-      
-      // Compute Stress at new point
-      
-      // Determine the point with the Stress closest to the original Stress
-      
-      // Assign the associated element and point
-      
-      // break out of the while loop
-      
+      std::cin >> QWERTY;
+
       // Average Y_Old and Y_New
-//       Y_New(0) = (Y_New(0) + Y_Old(0)) / 2;
-//       Y_New(1) = (Y_New(1) + Y_Old(1)) / 2;
+      Y_New(0) = (Y_New(0) + Y_Old(0)) / 2;
+      Y_New(1) = (Y_New(1) + Y_Old(1)) / 2;
       
       count = 0;
       
-      TIMESTEP = TIMESTEP / 10;
+//       a = sqrt((Y_Old(0) - x) * (Y_Old(0) - x) + (Y_Old(1) - y) * (Y_Old(1) - y));
+//       b = sqrt((Y_New(0) - x) * (Y_New(0) - x) + (Y_New(1) - y) * (Y_New(1) - y));
+//       
+//       // If the Old position is closer from the initial foot then the iteration in the osicialltion that I 
+//       // entered is not the one I want, so switch the New point to the Old point
+//       if(a < b) {
+// 	Y_New(0) = Y_Old(0);
+// 	Y_New(1) = Y_Old(1);
+//       };
+//       
+//       // This will put me somewhere inbetween the two oscilating points.
+//       TIMESTEP = TIMESTEP / 2; // This doesn't work.
       
     }
 
@@ -310,17 +300,13 @@ void DepartureFoot(int Vel_Flag,
 // 
 //     };
 
-    // if( abs(  ) < 0.000001)
-    // if( Y_New(0) / dx != floor(Y_New(0) / dx) )
-    
-//     if ((fmod(Y_New(0), dx) != 0.0) & (fmod(Y_New(1), dy) != 0.0)) {
-    if( (Y_New(0) / dx != floor(Y_New(0) / dx)) & (Y_New(1) / dx != floor(Y_New(1) / dy)) ) {
+    if( (Y_New(0) / dx != xDbl) & (Y_New(1) / dx != yDbl) ) {
       
       // If xInt = yInt then compare to the line y = x.  If xInt + 1 = yInt then compare to the line y = x + deltax, etc.
       // In general, let n = yInt - xInt and compare to the line y = x + n * deltax, where deltax = 1 / NX.
       // Assigns the point to the lower element if it is on the diagonal line.
       // If y is above the line
-      if (Y_New(1) > Y_New(0) + (yDbl - xDbl) * dx) {
+      if (Y_New(1) > Y_New(0) + (yInt - xInt) * dx) {
 	
 	New_Ele = yInt * 2 * NX + 2 * xInt + 2; // Top element
 	
@@ -329,8 +315,7 @@ void DepartureFoot(int Vel_Flag,
 	New_Ele = yInt * 2 * NX + 2 * xInt + 1; // bottom element
 	
       };
-//     } else if ((fmod(Y_New(0), dx) == 0.0) & (fmod(Y_New(1), dy) != 0.0)) {
-    } else if ( (Y_New(0) / dx == floor(Y_New(0) / dx)) & (Y_New(1) / dx != floor(Y_New(1) / dy)) ) {
+    } else if ( (Y_New(0) / dx == xDbl) & (Y_New(1) / dx != yDbl) ) {
       
       if(Y_New(0) != 0.0) {
 	
@@ -341,9 +326,7 @@ void DepartureFoot(int Vel_Flag,
 	New_Ele = yInt * 2 * NX + 2; // On the front of the domain
 	
       };
-	
-//     } else if ((fmod(Y_New(0), dx) != 0.0) & (fmod(Y_New(1), dy) == 0.0)) {
-    } else if ((Y_New(0) / dx != floor(Y_New(0) / dx)) & (Y_New(1) / dx == floor(Y_New(1) / dy))) {
+    } else if ((Y_New(0) / dx != xDbl) & (Y_New(1) / dx == yDbl)) {
       
       if(Y_New(1) != 0.0) {
 
@@ -354,9 +337,7 @@ void DepartureFoot(int Vel_Flag,
 	New_Ele = 2 * xInt + 1; // On the bottom of the domain.
 	
       };
-
-//     } else if ((fmod(Y_New(0), dx) == 0.0) & (fmod(Y_New(1), dy) == 0.0)) {
-    } else if ((Y_New(0) / dx == floor(Y_New(0) / dx)) & (Y_New(1) / dx == floor(Y_New(1) / dy))) {
+    } else {// if ((Y_New(0) / dx == xDbl) & (Y_New(1) / dx == yDbl)) {
       
       if((Y_New(0) != 0.0) & (Y_New(1) != 0.0)) {
 
@@ -493,7 +474,7 @@ void DepartureFoot(int Vel_Flag,
   
     Coeff = 1.0 + TIMESTEP / 2.0 * Trace_Grad_Vel + TIMESTEP * TIMESTEP / 4.0 * Det_Grad_Vel;
 
-    // The invere of gradu times it's determinant
+    // The inverse of gradu times it's determinant
     Det_Inv_Grad_Vel(0,0) = Grad_Vel(1,1);
     Det_Inv_Grad_Vel(0,1) = -Grad_Vel(0,1);
     Det_Inv_Grad_Vel(1,0) = -Grad_Vel(1,0);
@@ -501,8 +482,8 @@ void DepartureFoot(int Vel_Flag,
 
     // yold = x for the initializing step I - k/2 * det(gradu)*(gradu Inv)
     TempMat(0,0) = 1.0 + TIMESTEP / 2.0 * Det_Inv_Grad_Vel(0,0);
-    TempMat(0,1) = -TIMESTEP / 2.0 * Det_Inv_Grad_Vel(0,1);
-    TempMat(1,0) = -TIMESTEP / 2.0 * Det_Inv_Grad_Vel(1,0);
+    TempMat(0,1) = TIMESTEP / 2.0 * Det_Inv_Grad_Vel(0,1);
+    TempMat(1,0) = TIMESTEP / 2.0 * Det_Inv_Grad_Vel(1,0);
     TempMat(1,1) = 1.0 + TIMESTEP / 2.0 * Det_Inv_Grad_Vel(1,1);
 
     // yn + k * u((yn + x)/2) - x
@@ -539,6 +520,8 @@ void DepartureFoot(int Vel_Flag,
 
     // Compute the two norm
     Feet_Tol = Y_Norm.Norm2();
+    
+    count++;
 
   } // while
   
@@ -586,14 +569,13 @@ void DepartureFoot(int Vel_Flag,
 // 
 //   };
 
-  //     if ((fmod(Y_New(0), dx) != 0.0) & (fmod(Y_New(1), dy) != 0.0)) {
-    if( (Y_New(0) / dx != floor(Y_New(0) / dx)) & (Y_New(1) / dx != floor(Y_New(1) / dy)) ) {
+    if( (Y_New(0) / dx != xDbl) & (Y_New(1) / dx != yDbl) ) {
       
       // If xInt = yInt then compare to the line y = x.  If xInt + 1 = yInt then compare to the line y = x + deltax, etc.
       // In general, let n = yInt - xInt and compare to the line y = x + n * deltax, where deltax = 1 / NX.
       // Assigns the point to the lower element if it is on the diagonal line.
       // If y is above the line
-      if (Y_New(1) > Y_New(0) + (yDbl - xDbl) * dx) {
+      if (Y_New(1) > Y_New(0) + (yInt - xInt) * dx) {
 	
 	New_Ele = yInt * 2 * NX + 2 * xInt + 2; // Top element
 	
@@ -602,8 +584,7 @@ void DepartureFoot(int Vel_Flag,
 	New_Ele = yInt * 2 * NX + 2 * xInt + 1; // bottom element
 	
       };
-//     } else if ((fmod(Y_New(0), dx) == 0.0) & (fmod(Y_New(1), dy) != 0.0)) {
-    } else if ( (Y_New(0) / dx == floor(Y_New(0) / dx)) & (Y_New(1) / dx != floor(Y_New(1) / dy)) ) {
+    } else if ( (Y_New(0) / dx == xDbl) & (Y_New(1) / dx != yDbl) ) {
       
       if(Y_New(0) != 0.0) {
 	
@@ -614,9 +595,7 @@ void DepartureFoot(int Vel_Flag,
 	New_Ele = yInt * 2 * NX + 2; // On the front of the domain
 	
       };
-	
-//     } else if ((fmod(Y_New(0), dx) != 0.0) & (fmod(Y_New(1), dy) == 0.0)) {
-    } else if ((Y_New(0) / dx != floor(Y_New(0) / dx)) & (Y_New(1) / dx == floor(Y_New(1) / dy))) {
+    } else if ((Y_New(0) / dx != xDbl) & (Y_New(1) / dx == yDbl)) {
       
       if(Y_New(1) != 0.0) {
 
@@ -627,9 +606,7 @@ void DepartureFoot(int Vel_Flag,
 	New_Ele = 2 * xInt + 1; // On the bottom of the domain.
 	
       };
-
-//     } else if ((fmod(Y_New(0), dx) == 0.0) & (fmod(Y_New(1), dy) == 0.0)) {
-    } else if ((Y_New(0) / dx == floor(Y_New(0) / dx)) & (Y_New(1) / dx == floor(Y_New(1) / dy))) {
+    } else { // if ((Y_New(0) / dx == xDbl) & (Y_New(1) / dx == yDbl)) {
       
       if((Y_New(0) != 0.0) & (Y_New(1) != 0.0)) {
 
@@ -646,9 +623,7 @@ void DepartureFoot(int Vel_Flag,
       } else {
 
 	New_Ele = 1; // The lower left corner.
-	
       };
-
     };
 
 //   std::cout << "Before Departure Element" << endl;

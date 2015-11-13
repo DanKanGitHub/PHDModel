@@ -42,34 +42,31 @@ void InitMatZeroBio(int Vel_Npe,
 	      // The column of the global matrix
 	      jj = Vel_Nod(Ne,j) - 1;
 	      
-  // 	    if(All_Proc_Nodes_Bio(jj) == myid) // Am I at a column that I have elements on?
-  // 	    {
-		if(Bio_Nod_BC(Ne,j) != 1)
-		{
+	      if(Bio_Nod_BC(Ne,j) != 1)
+	      {
 
-		  Values[IndexCounter] = 0.0;
-		  
-		  Indices[IndexCounter] = jj;
+		Values[IndexCounter] = 0.0;
+		
+		Indices[IndexCounter] = jj;
 
-		  IndexCounter++;
-		}
-  // 	    }
+		IndexCounter++;
+	      }
 	    }
 	    //Build Global Matrix A one row at a time
 	    Error = A.InsertGlobalValues(ii, IndexCounter, Values, Indices);
 	    
-	    if(Error != 0) // && myid == 1)
-	    {
-	      std::cout << "InitMat Zero Bio Broke 1" << endl;
-	      std::cout << "myid =" << myid << endl;
-	      std::cout << "ii = " << ii << endl;
-	      std::cout << "jj = " << jj << endl;
-	      std::cout << "All_Proc_Nodes_Bio(jj) = " << All_Proc_Nodes_Bio(jj) << endl;
-	      Error = 0;
-	    }
+// 	    if(Error != 0) // && myid == 1)
+// 	    {
+// 	      std::cout << "InitMat Zero Bio Broke 1" << endl;
+// 	      std::cout << "myid =" << myid << endl;
+// 	      std::cout << "ii = " << ii << endl;
+// 	      std::cout << "jj = " << jj << endl;
+// 	      std::cout << "All_Proc_Nodes_Bio(jj) = " << All_Proc_Nodes_Bio(jj) << endl;
+// 	      Error = 0;
+// 	    }
 	  } // if ii != 1
 	  // If I own row ii then I also own column ii
-	  else if(Bio_Nod_BC(Ne,i) == 1) // && All_Proc_Nodes_Bio(ii) == myid) // Essential BC on this row
+	  else if(Bio_Nod_BC(Ne,i) == 1)
 	  {
 
 	    Values[0] = 0.0;
@@ -80,14 +77,14 @@ void InitMatZeroBio(int Vel_Npe,
 	    
 	    Error = A.InsertGlobalValues(ii, IndexCounter, Values, Indices);
 	    
-	    if(Error != 0) // && myid == 1)
-	    {
-	      std::cout << "InitMat Zero Bio Broke 2" << endl;
-	      std::cout << "myid =" << myid << endl;
-	      std::cout << "jj = " << jj << endl;
-	      std::cout << "All_Proc_Nodes_Bio(jj) = " << All_Proc_Nodes_Bio(jj) << endl;
-	      Error = 0;
-	    }
+// 	    if(Error != 0) // && myid == 1)
+// 	    {
+// 	      std::cout << "InitMat Zero Bio Broke 2" << endl;
+// 	      std::cout << "myid =" << myid << endl;
+// 	      std::cout << "jj = " << jj << endl;
+// 	      std::cout << "All_Proc_Nodes_Bio(jj) = " << All_Proc_Nodes_Bio(jj) << endl;
+// 	      Error = 0;
+// 	    }
 	  } // if ii for ii = 1
 	}
       } // vel i

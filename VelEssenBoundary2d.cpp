@@ -9,6 +9,8 @@ void VelEssenBoundary2d(int NX,
 			int ii, 
 			double x,
 			double y,
+			double Cur_Time,
+			double Timestep,
 			E_SDV & Vel_Gn)
 {
   // Essential boundary conditions
@@ -25,6 +27,6 @@ void VelEssenBoundary2d(int NX,
   }
   else
   {
-    EssenEntrance(x,y,Vel_Gn);
+    EssenEntrance(x,y,Cur_Time,Timestep,Vel_Gn);
   }
 }

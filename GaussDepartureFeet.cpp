@@ -1,3 +1,4 @@
+// The output of this subroutine is in barysentric coordinates
 #include "GaussDepartureFeet.h"
 
 void GaussDepartureFeet(int myid,

@@ -9,12 +9,10 @@ void InitialVel(int Nnm,
 {
   double x, y;
   
-  x = 0.0;
-  
   for (int i = 0; i <= Nnm-1; i++)
   {
+    x = Glxy(i,0);
     y = Glxy(i,1);
-    Vel[i] = HorizVel(x,
-		      y);
+    Vel[i] = 0.0; //HorizVel(x,y);
   }
 }
